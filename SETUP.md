@@ -1,13 +1,7 @@
 # Bedrock Setup Guide
 
-## Step 1: Install Bedrock
-
-### Option A: Pesde (Recommended)
-If you already have a project managed by [pesde](https://github.com/pesde-pkg/pesde):
-
-```bash
-pesde add gado7h/bedrock
-```
+### Option A: GitHub Releases (Recommended)
+Download the latest `Bedrock.rbxm` from the [Releases](https://github.com/gado7h/bedrock/releases) page and insert it into your project.
 
 ### Option B: Git Submodule
 If you want to track the latest development version:

@@ -17,25 +17,31 @@ A lightweight, Unix-like kernel for Roblox OS emulation. Bedrock provides core O
 
 ## 📦 Installation
 
-### Via pesde (Recommended)
+### Option A: GitHub Releases (Recommended)
+Download the latest `Bedrock.rbxm` from the [Releases](https://github.com/gado7h/bedrock/releases) page and insert it into your Roblox project.
+
+### Option B: Git Submodule
+If you are using Rojo, you can add Bedrock as a submodule:
 
 ```bash
-pesde add gado7h/bedrock
+git submodule add https://github.com/gado7h/bedrock.git packages/bedrock
 ```
 
 ### Rojo Configuration
 
-Bedrock is now split into **Kernel** (client-side) and **Server** (host-side) components.
+Bedrock is split into **Kernel** (client-side) and **Server** (host-side) components. Update your `default.project.json`:
 
 ```json
 {
   "tree": {
     "ReplicatedStorage": {
-      "Kernel": {
-        "$path": "pesde_packages/main/bedrock/src/Kernel"
-      },
-      "Server": {
-        "$path": "pesde_packages/main/bedrock/src/Server"
+      "Bedrock": {
+        "$path": "packages/bedrock/src/Kernel"
+      }
+    },
+    "ServerScriptService": {
+      "BedrockServer": {
+        "$path": "packages/bedrock/src/Server"
       }
     }
   }
@@ -117,7 +123,6 @@ src/
 
 - **Roblox Studio** (latest version)
 - **Rojo** 7.x or higher (for syncing)
-- **pesde** (for package management)
 - **Luau** (strict mode recommended)
 
 ## 📖 Usage Examples
