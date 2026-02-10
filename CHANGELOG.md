@@ -46,6 +46,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture guide
 - Complete API reference
 
+## [1.3.0] - 2026-02-10
+
+### Added
+- **32-Bit True Color (RGBA)**: Kernel now supports 16.7 million colors. VRAM is now a direct 4-byte-per-pixel buffer.
+- **Aspect Ratio Constraint**: GPU HAL now includes `UIAspectRatioConstraint` to ensure display proportions are maintained regardless of ScreenGui size.
+- **Memory Map Expansion**: Increased VRAM allocation to support up to 800x600 in True Color (1.92 MB).
+
+### Changed
+- Refactored `GPU.Flush` and primitive functions (`FillRect`, `Scroll`, `BitBlt`) for 32-bit pixel stride.
+- Relocated `PALETTE_BASE` and `HEAP_START` to accommodate larger VRAM.
+
 ## [1.2.3] - 2026-02-10
 
 ### Fixed

@@ -32,12 +32,12 @@ function Hardware.Init(System: any)
 			return System.GPU.Width, System.GPU.Height
 		end,
 
-		["GPU_SCROLL"] = function(dy: number, colorIndex: number)
-			System.GPU:Scroll(dy, colorIndex)
+		["GPU_SCROLL"] = function(dy: number, colorRGBA: number)
+			System.GPU:Scroll(dy, colorRGBA)
 		end,
 		
-		["GPU_RECT"] = function(x: number, y: number, w: number, h: number, colorIndex: number)
-			System.GPU:FillRect(x, y, w, h, colorIndex)
+		["GPU_RECT"] = function(x: number, y: number, w: number, h: number, colorRGBA: number)
+			System.GPU:FillRect(x, y, w, h, colorRGBA)
 		end,
 		
 		["GPU_BLIT"] = function(dx: number, dy: number, sx: number, sy: number, w: number, h: number)
