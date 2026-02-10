@@ -46,6 +46,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture guide
 - Complete API reference
 
+## [1.2.2] - 2026-02-10
+
+### Fixed
+- **BIOS POST HDD Failure**: Resolved a hardware initialization error where HALs failed to locate server-side remotes.
+- **Service Discovery Yield**: Fixed an infinite yield issue in `ServerScriptService` by correcting module require paths in `init.server.luau`.
+- **Host Service Bridge**: Established a unified `Bedrock_Host` folder in `ReplicatedStorage` for reliable client-server communication.
+
+### Changed
+- Standardized remote discovery across all hardware abstractions (HDD, Hub, Network).
+
 ## [Unreleased]
 
 ### Planned
