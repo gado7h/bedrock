@@ -1,0 +1,12 @@
+name = "gado7h/bedrock"
+version = "1.0.0"
+description = "A lightweight Unix-like kernel for Roblox OS emulation"
+authors = ["gado7h"]
+repository = "https://github.com/gado7h/bedrock"
+license = "MIT"
+includes = ["Kernel", "pesde.toml", "default.project.json", "README.md", "CHANGELOG.md"]
+
+[target]
+environment = "roblox"
+lib = "Kernel/init.luau"
+build_files = ["Kernel"]

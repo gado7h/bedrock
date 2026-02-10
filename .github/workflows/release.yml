@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rokit
+        uses: f0rest-dev/setup-rokit@v0.1.2
+
+      - name: Build rbxm
+        run: |
+          rokit authenticate --token ${{ secrets.GITHUB_TOKEN }}
+          rokit install
+          rojo build -o Bedrock.rbxm
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Bedrock.rbxm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
