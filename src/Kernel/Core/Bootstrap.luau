@@ -32,15 +32,26 @@ function Bootstrap.Init(System)
 		for _, child in ipairs(folder:GetChildren()) do
 			if child:IsA("ModuleScript") then
 				local name = child.Name
-				-- Only append .lua if no extension exists
-                local vfsFileName = vfsPath .. "/" .. name
-                if not string.find(name, "%.") then
-                    vfsFileName = vfsFileName .. ".lua"
-                end
-
 				local success, result = pcall(require, child)
 				if success then
-					VFS.Write(vfsFileName, result, 0, 0)
+                    local content = result
+                    local extension = ".lua"
+
+                    -- Dynamic extension support
+                    if type(result) == "table" and result.source and result.extension then
+                        content = result.source
+                        extension = result.extension
+                        if string.sub(extension, 1, 1) ~= "." then
+                            extension = "." .. extension
+                        end
+                    end
+
+                    local vfsFileName = vfsPath .. "/" .. name
+                    if not string.find(name, "%.") then
+                        vfsFileName = vfsFileName .. extension
+                    end
+
+					VFS.Write(vfsFileName, content, 0, 0)
 					Log.info("BOOTSTRAP", "Provisioned %s", vfsFileName)
 				else
 					Log.warn("BOOTSTRAP", "Failed to load %s: %s", name, tostring(result))
