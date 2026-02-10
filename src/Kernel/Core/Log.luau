@@ -22,6 +22,12 @@ local _klog: { string } = table.create(MAX_LOGS, "")
 local _head = 1
 local _count = 0
 
+function Log.Clear()
+	_klog = table.create(MAX_LOGS, "")
+	_head = 1
+	_count = 0
+end
+
 local function formatMessage(level: LogLevel, subsystem: string, msg: string, ...): string
 	local formatted = string.format(msg, ...)
 	return `[{string.format("%.4f", os.clock())}] [{level}] [{subsystem}] {formatted}`

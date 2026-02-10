@@ -93,6 +93,10 @@ function Library.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 			end
 			return result
 		end,
+
+		["WIPE_LIBS"] = function()
+			_libCache = {}
+		end,
 	}
 end
 
