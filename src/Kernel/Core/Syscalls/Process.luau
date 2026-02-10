@@ -1,11 +1,18 @@
---!strict
 local MemoryMap = require(script.Parent.Parent.Memory.MemoryMap)
+local _Types = require(script.Parent.Parent.Types)
+local Scheduler = require(script.Parent.Parent.Process.Scheduler)
+local Heap = require(script.Parent.Parent.Heap)
+local RAM = require(script.Parent.Parent.Parent.HAL.RAM)
+
+type System = {
+	Scheduler: Scheduler.Scheduler,
+	Heap: Heap.Heap,
+	RAM: RAM.RAM,
+}
 
 local Process = {}
 
-function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
-	local LuaVM = require(script.Parent.Parent.LuaVM)
-
+function Process.Init(System: System, CallSyscall)
 	-- We need CachedLoadstring here or in Library.luau?
 	-- EXEC uses CachedLoadstring. Library loads use it.
 	-- Let's put CachedLoadstring logic here or in Library.
@@ -16,7 +23,7 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 	local Loader = require(script.Parent.Parent.Loader)
 
 	return {
-		["SIGNAL"] = function(pid: number, sig: number)
+		["SIGNAL"] = function(pid, sig)
 			local proc = System.Scheduler.Processes[pid]
 			if proc then
 				proc.Signals = proc.Signals or {}
@@ -31,7 +38,7 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 		end,
 
 		-- Register a signal handler for the current process
-		["SIGNAL_HANDLER"] = function(sig: number, handler: ((...any) -> ())?)
+		["SIGNAL_HANDLER"] = function(sig, handler)
 			local pid = System.Scheduler.CurrentPID
 			if not pid then
 				return false
@@ -41,12 +48,13 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 				return false
 			end
 
-			proc.SignalHandlers = proc.SignalHandlers or {}
-			proc.SignalHandlers[sig] = handler -- nil to clear handler
+			local handlers = proc.SignalHandlers or {}
+			proc.SignalHandlers = handlers
+			handlers[sig] = handler -- nil to clear handler
 			return true
 		end,
 
-		["KILL"] = function(pid: number)
+		["KILL"] = function(pid)
 			local proc = System.Scheduler.Processes[pid]
 			if proc then
 				proc.Signals = proc.Signals or {}
@@ -71,7 +79,7 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 			end
 		end,
 
-		["WAIT_PID"] = function(targetPid: number)
+		["WAIT_PID"] = function(targetPid)
 			local myPid = System.Scheduler.CurrentPID
 			if not myPid then
 				return false
@@ -79,8 +87,9 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 
 			local target = System.Scheduler.Processes[targetPid]
 			if target and target.State ~= "DEAD" then
-				target.Waiters = target.Waiters or {}
-				target.Waiters[myPid] = true
+				local waiters = target.Waiters or {}
+				target.Waiters = waiters
+				waiters[myPid] = true
 
 				local me = System.Scheduler.Processes[myPid]
 				me.State = "WAITING"
@@ -90,30 +99,31 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 			return false
 		end,
 
-		["MALLOC"] = function(size: number)
+		["MALLOC"] = function(size)
 			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
+			local proc = if pid then System.Scheduler.Processes[pid] else nil
 
 			if proc and proc.MemoryLimit and (proc.MemoryUsed or 0) + size > proc.MemoryLimit then
 				return 0 -- Out of memory
 			end
 
 			local addr = System.Heap:Malloc(size)
-			if addr ~= 0 and proc then
+			if addr and proc then
 				proc.MemoryUsed = (proc.MemoryUsed or 0) + size
-				proc.Allocations = proc.Allocations or {}
-				proc.Allocations[addr] = size
+				local allocations = proc.Allocations or {}
+				proc.Allocations = allocations
+				allocations[addr] = size
 			end
-			return addr
+			return addr or 0
 		end,
 
-		["FREE"] = function(addr: number)
+		["FREE"] = function(addr)
 			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
+			local proc = if pid then System.Scheduler.Processes[pid] else nil
 
 			if proc and proc.Allocations and proc.Allocations[addr] then
-				local size = proc.Allocations[addr]
-				proc.MemoryUsed = proc.MemoryUsed - size
+				local size = proc.Allocations[addr] :: number
+				proc.MemoryUsed = (proc.MemoryUsed or 0) - size
 				proc.Allocations[addr] = nil
 			end
 
@@ -128,17 +138,17 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 			return list
 		end,
 
-		["PS_KILL"] = function(pid: number)
+		["PS_KILL"] = function(pid)
 			return System.Scheduler:Kill(pid)
 		end,
 
-		["ENV_GET"] = function(key: string)
+		["ENV_GET"] = function(key)
 			local pid = System.Scheduler.CurrentPID
 			local proc = pid and System.Scheduler.Processes[pid]
 			return proc and proc.Env[key]
 		end,
 
-		["ENV_SET"] = function(key: string, val: string)
+		["ENV_SET"] = function(key, val)
 			local pid = System.Scheduler.CurrentPID
 			local proc = pid and System.Scheduler.Processes[pid]
 			if proc then
@@ -154,7 +164,7 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 			return CallSyscall("REBOOT_INTERNAL")
 		end,
 
-		["EXEC"] = function(path: string, config: { stdin: number?, stdout: number?, args: { string }? }?)
+		["EXEC"] = function(path, config)
 			local content = CallSyscall("FS_READ", path)
 			if not content then
 				return false, "File not found"
@@ -171,7 +181,8 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 			end
 
 			-- Default Environment
-			local env = {
+			local env
+			env = {
 				print = function(...)
 					local args = { ... }
 					for i = 1, #args do
@@ -305,7 +316,7 @@ function Process.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 			return true, nil, pid
 		end,
 
-		["PROCESS_SPAWN"] = function(path: string, name: string)
+		["PROCESS_SPAWN"] = function(path, name)
 			-- Wrapper for EXEC to match common userland expectations
 			local ok, err, pid = CallSyscall("EXEC", path, { args = { name } })
 			return ok, pid or err

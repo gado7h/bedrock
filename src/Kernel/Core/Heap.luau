@@ -1,4 +1,3 @@
---!strict
 -- Kernel Heap Allocator (First-Fit)
 -- Manages RAM from 0x080000 to 0x0FFFFF
 
@@ -15,7 +14,7 @@ type BlockHeader = {
 
 export type Heap = typeof(setmetatable(
 	{} :: {
-		_ram: RAM.RAM,
+		_ram: any,
 		_start: number,
 		_end: number,
 		_blocks: { BlockHeader },
@@ -23,7 +22,7 @@ export type Heap = typeof(setmetatable(
 	Heap
 ))
 
-function Heap.new(ram: RAM.RAM, startAddr: number, endAddr: number): Heap
+function Heap.new(ram, startAddr, endAddr)
 	local self = setmetatable({
 		_ram = ram,
 		_start = startAddr,
@@ -36,6 +35,7 @@ function Heap.new(ram: RAM.RAM, startAddr: number, endAddr: number): Heap
 end
 
 function Heap:Malloc(size: number): number?
+	local self = self :: Heap
 	-- Align to 4 bytes
 	size = math.ceil(size / 4) * 4
 
@@ -65,6 +65,7 @@ function Heap:Malloc(size: number): number?
 end
 
 function Heap:Free(addr: number)
+	local self = self :: Heap
 	for i, block in ipairs(self._blocks) do
 		if block.addr == addr then
 			block.used = false
@@ -88,6 +89,7 @@ function Heap:Free(addr: number)
 end
 
 function Heap:Reset()
+	local self = self :: Heap
 	self._blocks = {
 		{ addr = self._start, size = self._end - self._start, used = false },
 	}

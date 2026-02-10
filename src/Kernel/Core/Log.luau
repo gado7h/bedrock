@@ -1,4 +1,3 @@
---!strict
 -- Kernel logging with severity levels
 -- Usage: Log.info("VFS", "Mounted driver at %s", path)
 
@@ -15,15 +14,15 @@ local LEVELS: { [LogLevel]: number } = {
 }
 
 -- Minimum level to display (change at runtime to filter noise)
-Log.MinLevel = LEVELS.INFO
+Log.MinLevel = LEVELS["INFO" :: any]
 
 -- Circular buffer for kernel logs (dmesg)
 local MAX_LOGS = 500
-local _klog: { string } = table.create(MAX_LOGS)
+local _klog: { string } = table.create(MAX_LOGS, "")
 local _head = 1
 local _count = 0
 
-local function formatMessage(level: LogLevel, subsystem: string, msg: string, ...: any): string
+local function formatMessage(level: LogLevel, subsystem: string, msg: string, ...): string
 	local formatted = string.format(msg, ...)
 	return `[{string.format("%.4f", os.clock())}] [{level}] [{subsystem}] {formatted}`
 end
@@ -66,7 +65,7 @@ function Log.dmesg(): { string }
 			idx += 1
 		end
 	end
-	return result
+	return result :: { string }
 end
 
 function Log.debug(subsystem: string, msg: string, ...: any)
@@ -91,7 +90,7 @@ end
 
 -- Enable debug output for a session
 function Log.SetDebug()
-	Log.MinLevel = LEVELS.DEBUG
+	Log.MinLevel = LEVELS["DEBUG" :: any]
 end
 
 return Log

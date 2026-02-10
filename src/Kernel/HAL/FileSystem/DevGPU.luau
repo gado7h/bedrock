@@ -5,13 +5,14 @@
 local DevGPU = {}
 DevGPU.Name = "DevGPU"
 
-local _gpu = nil -- Injected in Init
+local GPU = require(script.Parent.Parent.GPU)
+local _gpu: GPU.GPU? = nil -- Injected in Init
 
-function DevGPU.Init(gpu)
+function DevGPU.Init(gpu: GPU.GPU)
 	_gpu = gpu
 end
 
-function DevGPU.Read(path: string, uid: number)
+function DevGPU.Read(path: string, uid: number): string?
 	if not _gpu then
 		return nil
 	end
@@ -53,7 +54,7 @@ function DevGPU.Write(path: string, content: string, uid: number)
 			local y = tonumber(args[2])
 			local c = tonumber(args[3])
 			if x and y and c then
-				local addr = (y * _gpu.Width + x) * 4 -- Simple approx for VRAM addr?
+				local _ = (y * _gpu.Width + x) * 4 -- Simple approx for VRAM addr?
 				-- Wait, GPU.luau doesn't expose SetPixel directly, it uses VRAM
 				-- But we have _gpu instance.
 				-- Let's use direct VRAM access if we can, or add SetPixel to GPU
@@ -63,7 +64,7 @@ function DevGPU.Write(path: string, content: string, uid: number)
 				-- (y * width + x) + VRAM_START
 				local vramStart = 0x040000
 				local addr = vramStart + (y * _gpu.Width + x)
-				_gpu.RAM:Write8(addr, c)
+				_gpu._ram:Write8(addr, c)
 			end
 		end
 	end

@@ -1,6 +1,6 @@
---!strict
 local Scheduler = require(script.Parent.Process.Scheduler)
 local GPU = require(script.Parent.Parent.HAL.GPU)
+local RAM = require(script.Parent.Parent.HAL.RAM)
 
 -- Load Submodules
 local FileSystem = require(script.FileSystem)
@@ -18,7 +18,7 @@ export type System = {
 	HID: any,
 	VFS: any,
 	Pipes: any,
-	RAM: any,
+	RAM: RAM.RAM,
 	Heap: any,
 	Network: any,
 	Hub: any,
@@ -26,7 +26,7 @@ export type System = {
 
 local _system: System
 local _noYield = 0
-local HANDLERS = {}
+local HANDLERS: { [string]: any } = {}
 
 -- Forward declaration for internal call
 local function Call(name: string, ...: any)
@@ -55,28 +55,29 @@ local function Call(name: string, ...: any)
 		end
 	end
 
-	local handler = HANDLERS[name]
+	local handler: (...any) -> ...any = HANDLERS[name]
 	if handler then
 		return handler(...)
 	else
 		local Log = require(script.Parent.Log)
 		Log.warn("KERNEL", "Unknown Syscall: %s", name)
+		return nil, "Unknown Syscall"
 	end
 end
 
 Syscalls.Call = Call
-Syscalls.BootSequence = nil :: string?
+Syscalls.BootSequence = nil :: (() -> ())?
 
 function Syscalls.Init(system: System)
 	_system = system
 
 	-- Initialize Submodules
-	local fsHandlers = FileSystem.Init(system)
-	local procHandlers = Process.Init(system, Call)
-	local hwHandlers = Hardware.Init(system)
-	local netHandlers = Network.Init(system)
-	local libHandlers = Library.Init(system, Call)
-	local hubHandlers = Hub.Init(system)
+	local fsHandlers = FileSystem.Init(system) :: { [string]: any }
+	local procHandlers = Process.Init(system, Call) :: { [string]: any }
+	local hwHandlers = Hardware.Init(system) :: { [string]: any }
+	local netHandlers = Network.Init(system) :: { [string]: any }
+	local libHandlers = Library.Init(system, Call) :: { [string]: any }
+	local hubHandlers = Hub.Init(system) :: { [string]: any }
 
 	-- Merge Handlers
 	for k, v in pairs(fsHandlers) do
@@ -108,7 +109,7 @@ function Syscalls.Init(system: System)
 		-- Power Down Hardware
 		if _system.HID.Reset then
 			_system.HID.Enabled = false
-			_system.HID:Reset()
+			(_system.HID :: any):Reset()
 		end
 
 		-- Wipe Memory & State
@@ -119,7 +120,7 @@ function Syscalls.Init(system: System)
 
 		-- Restore Palette and Clear Screen
 		if _system.GPU.Reset then
-			_system.GPU:Reset()
+			(_system.GPU :: any):Reset()
 		else
 			_system.GPU:Clear(0)
 		end
@@ -136,11 +137,11 @@ function Syscalls.Init(system: System)
 		_system.Scheduler.Processes = {}
 		_system.Scheduler._nextPid = 1
 		_system.Scheduler.CurrentPID = nil
-		_system.Scheduler.SearchQueue = {}
+		(_system.Scheduler :: any).SearchQueue = {}
 		_system.Scheduler.Halted = false
 
 		-- Re-Provision Filesystem
-		local Bootstrap = require(script.Parent.Parent.Core.Bootstrap)
+		local Bootstrap = require(script.Parent.Parent.Bootstrap)
 		Bootstrap.Init(_system.VFS)
 
 		Log.info("KERNEL", "System state cleared. Restarting BIOS in 500ms...")
@@ -166,7 +167,7 @@ function Syscalls.Init(system: System)
 		-- Power Down Input
 		if _system.HID.Reset then
 			_system.HID.Enabled = false
-			_system.HID:Reset()
+			(_system.HID :: any):Reset()
 		end
 
 		-- Wipe Memory
@@ -214,7 +215,7 @@ function Syscalls.Init(system: System)
 					path = path .. string.char(char)
 					addr = addr + 1
 				end
-				local ok, err, pid = Syscalls.Call("EXEC", path)
+				local _ok, _err, pid = Syscalls.Call("EXEC", path)
 				cpu._state.Registers[1] = pid or 0
 			elseif num == 6 then -- START_SHELL
 				task.spawn(function()

@@ -1,3 +1,4 @@
+--!nocheck
 --[[
 FiOne
 Copyright (C) 2021  Rerumu
@@ -16,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ]]
 --
-local bit = bit or bit32 or require("bit")
+bit = bit or bit32 or require("bit")
 
 if not table.create then
 	function table.create(_)

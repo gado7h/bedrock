@@ -2,5 +2,5 @@
 # It is not intended for manual editing.
 format = 2
 name = "gado7h/bedrock"
-version = "1.0.0"
+version = "1.1.0"
 target = "roblox"

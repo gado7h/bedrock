@@ -50,10 +50,32 @@ Bedrock is a professional-grade kernel that requires a server-side component for
 Ensure the `Server` folder is synced to `ReplicatedStorage`. The `init.server.luau` script will automatically handle RemoteFunction initialization.
 
 ### 2. Boot the Kernel (Client)
+
+Bedrock is a "Distribution-First" kernel. You initialize it with a configuration and then start the boot process.
+
 ```luau
-local Kernel = require(ReplicatedStorage.Kernel)
-Kernel.Boot()
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Bedrock = require(ReplicatedStorage.Bedrock.Kernel)
+
+-- Configure your Distribution
+local config = {
+    Name = "MyDistro",
+    Version = "1.0.0",
+    RAMSize = 512 * 1024 * 1024, -- 512 MB
+    
+    -- Optional: Provision initial files
+    VFS = {
+        ["/boot/grub/grub.cfg"] = "linux /boot/vmlinuz.lua",
+        ["/boot/vmlinuz.lua"] = "print('Hello from Bedrock!')"
+    }
+}
+
+-- Initialize & Start
+Bedrock.Init(config)
+Bedrock.Start()
 ```
+
+For more details on building your own OS, see the [Distributions Guide](docs/DISTRIBUTIONS.md).
 
 ## 🌐 Network & Services
 
@@ -73,7 +95,8 @@ Automatically maps `/dev/hdd` to a per-player DataStore, ensuring files persist 
 ## 📚 Documentation
 
 - [Architecture Guide](docs/ARCHITECTURE.md) - System design and components
-- [API Reference](docs/API.md) - Complete syscall documentation
+- [API Reference](docs/API.md) - Complete documentation for all 30+ syscalls
+- [Distributions Guide](docs/DISTRIBUTIONS.md) - Build your own OS on Bedrock
 - [Changelog](CHANGELOG.md) - Version history
 
 ## 🏗️ Architecture

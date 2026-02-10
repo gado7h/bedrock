@@ -1,4 +1,3 @@
---!strict
 -- POSIX-compatible error codes for kernel operations
 
 local Errno = {}

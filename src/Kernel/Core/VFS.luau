@@ -1,4 +1,3 @@
---!strict
 -- Virtual File System (RAM based)
 local VFS = {}
 
@@ -6,7 +5,7 @@ type Node = {
 	Type: "DIR" | "FILE",
 	Name: string,
 	Parent: Node?,
-	Children: { [string]: Node }, -- For DIR
+	Children: { [string]: Node }?, -- For DIR
 	Content: string?, -- For FILE
 	UID: number, -- Owner ID
 	GID: number, -- Group ID
@@ -27,10 +26,10 @@ local _pathCache: { [string]: Node } = {}
 -- Selective cache invalidation (invalidates path and all children)
 local function invalidatePath(path: string)
 	local normalized = VFS.NormalizePath(path)
-	
+
 	-- Invalidate this exact path
 	_pathCache[normalized] = nil
-	
+
 	-- Invalidate all parent paths up to root
 	local parts = string.split(normalized, "/")
 	local accumulated = ""
@@ -40,7 +39,7 @@ local function invalidatePath(path: string)
 			_pathCache[accumulated] = nil
 		end
 	end
-	
+
 	-- Invalidate all children (prefix match)
 	local prefix = normalized .. "/"
 	for cachedPath in pairs(_pathCache) do
@@ -217,13 +216,20 @@ function VFS.Chown(path: string, newUid: number, newGid: number, uid: number, gi
 	return true
 end
 
-function VFS.List(path: string, uid: number, gid: number): { string }?
+function VFS.List(path: string, uid: number?, gid: number?): { string }?
+	-- 1. Check for Mounted Driver
+	local driver, relPath = VFS.GetDriver(path)
+	if driver and driver.List then
+		return driver:List(relPath, uid)
+	end
+
+	-- 2. Internal VFS
 	if not VFS.CheckAccess(path, 4, uid, gid) then
 		return nil
 	end
 
 	local node = VFS.Traverse(path)
-	if node and node.Type == "DIR" then
+	if node and node.Type == "DIR" and node.Children then
 		local names = {}
 		for name, _ in pairs(node.Children) do
 			table.insert(names, name)
@@ -233,7 +239,14 @@ function VFS.List(path: string, uid: number, gid: number): { string }?
 	return nil
 end
 
-function VFS.Write(path: string, content: string, uid: number, gid: number): (boolean, number?)
+function VFS.Write(path: string, content: string, uid: number?, gid: number?): (boolean, number?)
+	-- 1. Check for Mounted Driver
+	local driver, relPath = VFS.GetDriver(path)
+	if driver and driver.Write then
+		return driver:Write(relPath, content, uid)
+	end
+	
+	-- 2. Internal VFS
 	-- Get Parent Dir
 	local parts = string.split(path, "/")
 	local fileName = table.remove(parts) -- Pop last
@@ -252,7 +265,7 @@ function VFS.Write(path: string, content: string, uid: number, gid: number): (bo
 	end
 
 	local dir = VFS.Traverse(dirPath)
-	if dir and dir.Type == "DIR" then
+	if dir and dir.Type == "DIR" and dir.Children then
 		local existing = dir.Children[fileName]
 
 		if existing and not VFS.CheckAccess(path, 2, uid, gid) then
@@ -276,7 +289,14 @@ function VFS.Write(path: string, content: string, uid: number, gid: number): (bo
 	end
 end
 
-function VFS.Read(path: string, uid: number, gid: number): (string?, number?)
+function VFS.Read(path: string, uid: number?, gid: number?): (string?, number?)
+	-- 1. Check for Mounted Driver
+	local driver, relPath = VFS.GetDriver(path)
+	if driver and driver.Read then
+		return driver:Read(relPath, uid)
+	end
+
+	-- 2. Internal VFS
 	if not VFS.CheckAccess(path, 4, uid, gid) then
 		return nil, Errno.EACCES
 	end
@@ -288,7 +308,15 @@ function VFS.Read(path: string, uid: number, gid: number): (string?, number?)
 	return nil, Errno.ENOENT
 end
 
-function VFS.MkDir(path: string, uid: number, gid: number)
+function VFS.MkDir(path: string, uid: number?, gid: number?)
+	-- 1. Check for Mounted Driver
+	local driver, relPath = VFS.GetDriver(path)
+	if driver and driver.MkDir then
+		driver:MkDir(relPath, uid)
+		return
+	end
+
+	-- 2. Internal VFS
 	local parts = string.split(path, "/")
 	local dirName = table.remove(parts)
 	if not dirName then
@@ -306,14 +334,14 @@ function VFS.MkDir(path: string, uid: number, gid: number)
 	end
 
 	local parent = VFS.Traverse(parentPath)
-	if parent and parent.Type == "DIR" then
+	if parent and parent.Type == "DIR" and parent.Children then
 		if not parent.Children[dirName] then
 			parent.Children[dirName] = {
 				Type = "DIR",
 				Name = dirName,
 				Parent = parent,
 				Children = {},
-				UID = uid,
+				UID = uid or 0,
 				GID = gid or 0,
 				Mode = 493, -- 0755 default for directories
 			}
@@ -326,11 +354,12 @@ end
 local _mounts: { [string]: any } = {}
 
 function VFS.Mount(path: string, driver: any)
+	local Log = require(script.Parent.Log)
 	_mounts[path] = driver
-	print("[VFS] Mounted " .. (driver.Name or "Driver") .. " at " .. path)
+	Log.info("VFS", "Mounted %s at %s", driver.Name or "Driver", path)
 end
 
-function VFS.Remove(path: string, uid: number, gid: number): boolean
+function VFS.Remove(path: string, uid: number?, gid: number?): boolean
 	local parts = string.split(path, "/")
 	local nodeName = table.remove(parts)
 	if not nodeName then
@@ -348,7 +377,7 @@ function VFS.Remove(path: string, uid: number, gid: number): boolean
 	end
 
 	local parent = VFS.Traverse(parentPath)
-	if parent and parent.Type == "DIR" and parent.Children[nodeName] then
+	if parent and parent.Type == "DIR" and parent.Children and parent.Children[nodeName] then
 		parent.Children[nodeName] = nil
 		invalidatePath(path)
 		return true
@@ -356,7 +385,7 @@ function VFS.Remove(path: string, uid: number, gid: number): boolean
 	return false
 end
 
-function VFS.Stat(path: string, uid: number, gid: number): any?
+function VFS.Stat(path: string, uid: number?, gid: number?): any?
 	local node = VFS.Traverse(path)
 	if not node then
 		return nil

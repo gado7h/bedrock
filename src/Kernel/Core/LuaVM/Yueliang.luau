@@ -1,3 +1,4 @@
+--!nocheck
 -- Adapted from the amazing Yueliang project
 -- http://yueliang.luaforge.net/
 

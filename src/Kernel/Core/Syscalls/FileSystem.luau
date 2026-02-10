@@ -1,28 +1,26 @@
---!strict
-
 local FileSystem = {}
 
 function FileSystem.Init(System: any)
-	local function asyncVFS(proc, func, ...)
+	local function asyncVFS(proc: any, func, ...): ...any
 		if proc.SyscallResult then
-			local res = proc.SyscallResult
+			local resultVFS = proc.SyscallResult
 			proc.SyscallResult = nil
-			return table.unpack(res)
+			return table.unpack(resultVFS :: any)
 		end
 
 		proc.State = "SYSCALL"
 		local args = { ... }
 		task.spawn(function()
-			local res = { func(table.unpack(args)) }
-			proc.SyscallResult = res
+			local resultVFS = { func(table.unpack(args)) }
+			proc.SyscallResult = resultVFS
 			System.Scheduler:WakeUp(proc.PID)
 		end)
 		coroutine.yield()
 
 		if proc.SyscallResult then
-			local res = proc.SyscallResult
+			local resultVFS = proc.SyscallResult
 			proc.SyscallResult = nil
-			return table.unpack(res)
+			return table.unpack(resultVFS :: any)
 		end
 	end
 
@@ -97,7 +95,7 @@ function FileSystem.Init(System: any)
 			local driver, relPath = System.VFS.GetDriver(path)
 			if driver and driver.Async and driver.Remove then
 				-- Support async Remove if driver has it
-				return asyncVFS(proc, driver.Remove, relPath, uid, gid)
+				return asyncVFS(proc, driver.Remove :: any, relPath, uid, gid)
 			end
 
 			return System.VFS.Remove(path, uid, gid)

@@ -1,9 +1,18 @@
---!strict
+local Scheduler = require(script.Parent.Parent.Process.Scheduler)
+local Heap = require(script.Parent.Parent.Heap)
+local RAM = require(script.Parent.Parent.Parent.HAL.RAM)
+
+type System = {
+	Scheduler: Scheduler.Scheduler,
+	Heap: Heap.Heap,
+	RAM: RAM.RAM,
+}
+
 local Network = {}
 
-function Network.Init(System: any)
+function Network.Init(System)
 	return {
-		["NET_REQ"] = function(command: string, ...: any)
+		["NET_REQ"] = function(command, ...)
 			-- Security: Check if network is available
 			if not System.Network then
 				return false, "No Network Adapter"
@@ -38,7 +47,7 @@ function Network.Init(System: any)
 
 				-- 3. On completion, store result and Wake Process
 				proc.SyscallResult = { success, result }
-				proc.State = "READY"
+				System.Scheduler:WakeUp(pid)
 			end)
 
 			-- 4. Yield the process coroutine to Scheduler

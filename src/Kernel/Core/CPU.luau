@@ -1,4 +1,3 @@
---!strict
 -- Voyager-1 CPU Emulator (v2)
 -- 64-bit Instruction Word: [Op:8][Dest:8][S1:8][S2:8][Imm:32]
 
@@ -58,11 +57,12 @@ function CPU.new(ram: RAM.RAM): CPU
 	return self
 end
 
-function CPU:SetSyscallHandler(handler: (num: number, cpu: CPU) -> ())
+function CPU:SetSyscallHandler(handler)
 	self._syscallHandler = handler
 end
 
 function CPU:Step()
+	local self = self
 	if self._state.Halted then
 		return
 	end

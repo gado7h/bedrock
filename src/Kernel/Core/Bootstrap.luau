@@ -1,4 +1,3 @@
---!strict
 local Bootstrap = {}
 
 function Bootstrap.Init(VFS)
@@ -8,7 +7,7 @@ function Bootstrap.Init(VFS)
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local Userspace = ReplicatedStorage:WaitForChild("Userspace")
 
-	local function provisionFolder(folderName, vfsPath)
+	local function provisionFolder(folderName: string, vfsPath: string)
 		local folder = Userspace:FindFirstChild(folderName)
 		if not folder then
 			return

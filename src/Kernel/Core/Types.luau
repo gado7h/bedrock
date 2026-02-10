@@ -1,4 +1,3 @@
---!strict
 export type ProcessState = "READY" | "RUNNING" | "WAITING" | "DEAD" | "SLEEPING" | "SYSCALL"
 
 export type CPUState = {
@@ -29,8 +28,13 @@ export type Process = {
 	UID: number,
 	GID: number,
 	Waiters: { [number]: boolean }?,
+	Priority: number, -- 0: Low, 1: Normal, 2: High
 	Next: number?, -- Linked List for Scheduler
 	Prev: number?,
+	MemoryUsed: number?,
+	MemoryLimit: number?,
+	Allocations: { [number]: number }?,
+	OpenHandles: { [number]: boolean }?, -- Track pipe handles for automatic cleanup
 }
 
 return {}

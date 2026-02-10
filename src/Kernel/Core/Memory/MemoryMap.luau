@@ -1,4 +1,3 @@
---!strict
 -- Centralized memory address constants for the Voyager-1 architecture
 -- All kernel/HAL modules reference this instead of hardcoded addresses
 

@@ -1,4 +1,3 @@
---!strict
 local Hardware = {}
 
 function Hardware.Init(System: any)
@@ -36,8 +35,16 @@ function Hardware.Init(System: any)
 		["GPU_SCROLL"] = function(dy: number, colorIndex: number)
 			System.GPU:Scroll(dy, colorIndex)
 		end,
+		
+		["GPU_RECT"] = function(x: number, y: number, w: number, h: number, colorIndex: number)
+			System.GPU:FillRect(x, y, w, h, colorIndex)
+		end,
+		
+		["GPU_BLIT"] = function(dx: number, dy: number, sx: number, sy: number, w: number, h: number)
+			System.GPU:BitBlt(dx, dy, sx, sy, w, h)
+		end,
 
-		["PRINT"] = function(msg)
+		["PRINT"] = function(msg: string)
 			local pid = System.Scheduler.CurrentPID
 			local proc = pid and System.Scheduler.Processes[pid]
 			if proc and proc.StdoutPipe then
@@ -63,7 +70,18 @@ function Hardware.Init(System: any)
 		end,
 
 		["PIPE_OPEN"] = function()
-			return System.Pipes.Open()
+			local handle = System.Pipes.Open()
+			local pid = System.Scheduler.CurrentPID
+			if pid then
+				local proc = System.Scheduler.Processes[pid]
+				if proc then
+					if not proc.OpenHandles then
+						proc.OpenHandles = {}
+					end
+					proc.OpenHandles[handle] = true
+				end
+			end
+			return handle
 		end,
 
 		["PIPE_WRITE"] = function(handle: number, data: string)
@@ -80,6 +98,13 @@ function Hardware.Init(System: any)
 
 		["PIPE_CLOSE"] = function(handle: number)
 			System.Pipes.Close(handle)
+			local pid = System.Scheduler.CurrentPID
+			if pid then
+				local proc = System.Scheduler.Processes[pid]
+				if proc and proc.OpenHandles then
+					proc.OpenHandles[handle] = nil
+				end
+			end
 		end,
 
 		["POLL_EVENTS"] = function()

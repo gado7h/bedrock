@@ -1,9 +1,8 @@
---!strict
 local HttpService = game:GetService("HttpService")
 
 local InternetService = {}
 
-function InternetService.HandleRequest(player: Player, method: string, url: string, headers: {[string]: string}?, body: string?)
+function InternetService.HandleRequest(player, method, url, headers, body)
 	-- Basic security: We could whitelist domains here if needed.
 	-- For a kernel service, we provide the raw capability.
 
@@ -12,7 +11,7 @@ function InternetService.HandleRequest(player: Player, method: string, url: stri
 			Url = url,
 			Method = method,
 			Headers = headers,
-			Body = body
+			Body = body,
 		})
 	end)
 
@@ -22,7 +21,7 @@ function InternetService.HandleRequest(player: Player, method: string, url: stri
 			Success = false,
 			StatusCode = 500,
 			StatusMessage = "Internal Server Error",
-			Body = tostring(result)
+			Body = tostring(result),
 		}
 	end
 

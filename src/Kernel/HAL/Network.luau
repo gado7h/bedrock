@@ -1,37 +1,45 @@
---!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+local _RunService = game:GetService("RunService")
 
 local Network = {}
 Network.__index = Network
 
-export type Network = typeof(setmetatable(
-	{} :: {
-		_remote: RemoteFunction?,
-	},
-	Network
-))
+export type Network = {
+	_remote: RemoteFunction?,
+	Request: (self: Network, command: string, ...any) -> (boolean, any),
+	Init: (self: Network) -> (boolean, string?),
+	Shutdown: (self: Network) -> (),
+}
 
-function Network.new(): Network
+function Network.new()
 	local self = setmetatable({
 		_remote = nil,
 	}, Network)
-
-	-- Locate the RemoteFunction
-	local ServerFolder = ReplicatedStorage:WaitForChild("Server", 10)
-	if ServerFolder then
-		self._remote = ServerFolder:WaitForChild("Bedrock_Internet", 5) :: RemoteFunction?
-	end
-
-	if not self._remote then
-		warn("[KERNEL] Network HAL: Could not find 'Bedrock_Internet' RemoteFunction!")
-	end
-
 	return self
 end
 
-function Network:Request(command: string, ...: any): (boolean, any)
+function Network:Init()
+	local self = self
+	local ServerFolder = ReplicatedStorage:WaitForChild("Server", 10)
+	if ServerFolder then
+		self._remote = ServerFolder:WaitForChild("Bedrock_Internet", 5)
+	end
+
 	if not self._remote then
+		return false, "Bedrock_Internet remote not found"
+	end
+
+	return true, nil
+end
+
+function Network:Shutdown()
+	local self = self
+	self._remote = nil
+end
+
+function Network:Request(command, ...)
+	local remote = self._remote
+	if not remote then
 		return false, "Network Offline"
 	end
 
@@ -41,7 +49,7 @@ function Network:Request(command: string, ...: any): (boolean, any)
 
 	local args = { ... }
 	local ok, result = pcall(function()
-		return self._remote:InvokeServer(command, unpack(args))
+		return remote:InvokeServer(command, unpack(args))
 	end)
 
 	if not ok then

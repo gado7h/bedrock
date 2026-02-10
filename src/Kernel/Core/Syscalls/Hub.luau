@@ -1,4 +1,3 @@
---!strict
 local Syscalls = {}
 
 function Syscalls.Init(system: any)

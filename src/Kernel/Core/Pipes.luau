@@ -1,4 +1,3 @@
---!strict
 -- Pipes Service: Handles FIFO communication between processes
 
 local Pipes = {
@@ -27,7 +26,7 @@ function Pipes.Write(handle: number, data: string)
 	return false
 end
 
-function Pipes.Read(handle: number)
+function Pipes.Read(handle: number): string?
 	local pipe = Pipes._pipes[handle]
 	if not pipe then
 		return nil

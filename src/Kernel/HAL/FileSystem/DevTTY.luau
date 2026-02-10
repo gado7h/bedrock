@@ -6,10 +6,10 @@ local DevTTY = {}
 DevTTY.Name = "DevTTY"
 
 -- We need access to Scheduler to find Current Process
-local _scheduler = nil
-local _pipes = nil
+local _scheduler: any = nil
+local _pipes: any = nil
 
-function DevTTY.Init(scheduler, pipes)
+function DevTTY.Init(scheduler: any, pipes: any)
 	_scheduler = scheduler
 	_pipes = pipes
 end

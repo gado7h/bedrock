@@ -1,24 +1,17 @@
 {
   "languageMode": "strict",
   "lint": {
-    "*": {
-      "level": "warning"
-    },
-    "LocalShadow": {
-      "level": "disabled"
-    },
-    "LocalUnused": {
-      "level": "warning"
-    },
-    "UnknownGlobal": {
-      "level": "error"
-    }
+    "*": true,
+    "LocalShadow": false,
+    "LocalUnused": true,
+    "UnknownGlobal": true
   },
   "lintErrors": true,
   "globals": [
     "game",
     "workspace",
     "script",
-    "shared"
+    "shared",
+    "task"
   ]
 }

@@ -1,4 +1,3 @@
---!strict
 -- Kernel Heap Allocator (First-Fit)
 -- Manages RAM from 0x080000 to 0x0FFFFF
 
@@ -35,11 +34,11 @@ function Heap.new(ram: RAM.RAM, startAddr: number, endAddr: number): Heap
 	return self
 end
 
-function Heap:Malloc(size: number): number?
+function Heap.Malloc(self: Heap, size: number): number?
 	-- Align to 4 bytes
 	size = math.ceil(size / 4) * 4
 
-	for i, block in ipairs(self._blocks) do
+	for i, block: BlockHeader in ipairs(self._blocks) do
 		if not block.used and block.size >= size then
 			-- Found a fit!
 			block.used = true
@@ -64,8 +63,8 @@ function Heap:Malloc(size: number): number?
 	return nil -- OOM
 end
 
-function Heap:Free(addr: number)
-	for i, block in ipairs(self._blocks) do
+function Heap.Free(self: Heap, addr: number)
+	for i, block: BlockHeader in ipairs(self._blocks) do
 		if block.addr == addr then
 			block.used = false
 
@@ -87,7 +86,7 @@ function Heap:Free(addr: number)
 	end
 end
 
-function Heap:Reset()
+function Heap.Reset(self: Heap)
 	self._blocks = {
 		{ addr = self._start, size = self._end - self._start, used = false },
 	}

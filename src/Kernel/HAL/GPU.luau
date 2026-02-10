@@ -1,4 +1,4 @@
---!strict
+
 local Players = game:GetService("Players")
 local AssetService = game:GetService("AssetService")
 
@@ -11,19 +11,24 @@ local MemoryMap = require(script.Parent.Parent.Core.Memory.MemoryMap)
 local GPU = {}
 GPU.__index = GPU
 
-export type GPU = typeof(setmetatable(
-	{} :: {
-		_editableImage: EditableImage,
-		_ram: RAM.RAM,
-		_vramOffset: number,
-		_paletteOffset: number,
-		_rgbaBuffer: buffer, -- Internal buffer for EditableImage upload
-		Width: number,
-		Height: number,
-		_frameCount: number,
-	},
-	GPU
-))
+export type GPU = {
+	_editableImage: EditableImage?,
+	_ram: any,
+	_vramOffset: number,
+	_paletteOffset: number,
+	_rgbaBuffer: buffer,
+	_player: Player?,
+	Width: number,
+	Height: number,
+	_frameCount: number,
+	Init: (self: GPU) -> (boolean, string?),
+	Shutdown: (self: GPU) -> (),
+	InitPalette: (self: GPU) -> (),
+	Flush: (self: GPU, x: number?, y: number?, w: number?, h: number?) -> (),
+	Clear: (self: GPU, colorIndex: number) -> (),
+	Reset: (self: GPU) -> (),
+	Scroll: (self: GPU, dy: number, colorIndex: number) -> (),
+}
 
 -- Memory Map constants
 local VRAM_ADDR = MemoryMap.VRAM_BASE
@@ -33,10 +38,25 @@ function GPU.new(ram: RAM.RAM, width: number, height: number, AssetServiceOverri
 	local _AssetService = AssetServiceOverride or AssetService
 	local _Players = PlayersOverride or Players
 
-	local player = _Players.LocalPlayer
+	local self = setmetatable({
+		_editableImage = nil,
+		_ram = ram,
+		_vramOffset = VRAM_ADDR,
+		_paletteOffset = PALETTE_ADDR,
+		_rgbaBuffer = buffer.create(width * height * 4),
+		_player = _Players.LocalPlayer,
+		Width = width,
+		Height = height,
+		_frameCount = 0,
+	}, GPU)
+
+	return (self :: any) :: GPU
+end
+
+function GPU.Init(self: GPU): (boolean, string?)
+	local player = self._player
 	local playerGui = player and player:FindFirstChild("PlayerGui")
 
-	local editableImage
 	if playerGui then
 		local screenGui = Instance.new("ScreenGui")
 		screenGui.Name = "VOYAGER_DISPLAY"
@@ -56,45 +76,42 @@ function GPU.new(ram: RAM.RAM, width: number, height: number, AssetServiceOverri
 		imageLabel.ResampleMode = Enum.ResamplerMode.Pixelated
 		imageLabel.Parent = screenGui
 
-		editableImage = _AssetService:CreateEditableImage({
-			Size = Vector2.new(width, height),
+		self._editableImage = AssetService:CreateEditableImage({
+			Size = Vector2.new(self.Width, self.Height),
 		})
-		imageLabel.ImageContent = Content.fromObject(editableImage)
-	else
-		-- Headless / Testing context or override
-		-- If override provides its own CreateEditableImage, use it
-		if _AssetService and _AssetService.CreateEditableImage then
-			editableImage = _AssetService:CreateEditableImage({
-				Size = Vector2.new(width, height),
-			})
-		else
-			editableImage = {
-				WritePixelsBuffer = function() end,
-				WritePixels = function() end,
-				ReadPixels = function()
-					return buffer.create(width * height * 4)
-				end,
-			} :: any
+		if self._editableImage then
+			imageLabel.ImageContent = Content.fromObject(self._editableImage)
 		end
+	else
+		-- Headless / Testing
+		local w: number = self.Width
+		local h: number = self.Height
+		self._editableImage = {
+			WritePixelsBuffer = function() end,
+			WritePixels = function() end,
+			ReadPixels = function()
+				return buffer.create(w * h * 4)
+			end,
+		} :: any
 	end
-
-	local self = setmetatable({
-		_editableImage = editableImage,
-		_ram = ram,
-		_vramOffset = VRAM_ADDR,
-		_paletteOffset = PALETTE_ADDR,
-		_rgbaBuffer = buffer.create(width * height * 4),
-		Width = width,
-		Height = height,
-		_frameCount = 0,
-	}, GPU)
 
 	self:InitPalette()
 	self:Clear(0)
-	return self
+	return true, nil
 end
 
-function GPU:InitPalette()
+function GPU.Shutdown(self: GPU)
+	local player = self._player
+	local gui = player and player:FindFirstChild("PlayerGui")
+	if gui then
+		local display = gui:FindFirstChild("VOYAGER_DISPLAY")
+		if display then
+			display:Destroy()
+		end
+	end
+end
+
+function GPU.InitPalette(self: GPU)
 	-- 16-color CGA/Studio-compatible palette
 	local colors = {
 		{ 0, 0, 0 }, -- 0: Black
@@ -125,14 +142,17 @@ end
 
 -- Converts indexed VRAM to RGBA for display
 -- Accepts optional dirty region (x, y, w, h) for partial pixel conversion
-function GPU:Flush(x: number?, y: number?, w: number?, h: number?)
-	self._frameCount += 1
+-- Converts indexed VRAM to RGBA for display
+-- Accepts optional dirty region (x, y, w, h) for partial pixel conversion
+function GPU.Flush(self: GPU, x: number?, y: number?, w: number?, h: number?)
+	local frameCount = (self :: any)._frameCount :: number
+	(self :: any)._frameCount = frameCount + 1
 	local ramBuf = self._ram:GetBuffer()
 	local rgbaBuf = self._rgbaBuffer
 	local vram = self._vramOffset
 	local pal = self._paletteOffset
-	local width = self.Width
-	local height = self.Height
+	local width: number = (self :: any).Width :: number
+	local height: number = (self :: any).Height :: number
 
 	-- If dirty region provided, only convert those pixels (VRAM->RGBA)
 	-- Still upload full buffer since EditableImage doesn't support partial writes with offset
@@ -143,9 +163,15 @@ function GPU:Flush(x: number?, y: number?, w: number?, h: number?)
 		local endY = math.clamp(y + h, 0, height)
 
 		-- Only convert dirty pixels from indexed to RGBA
-		for py = startY, endY - 1 do
-			local rowOffset = py * width
-			for px = startX, endX - 1 do
+		local w_val: number = width :: any
+		local sx: number = startX :: any
+		local ex: number = endX :: any
+		local sy: number = startY :: any
+		local ey: number = endY :: any
+
+		for py = sy, ey - 1 do
+			local rowOffset = py * w_val
+			for px = sx, ex - 1 do
 				local i = rowOffset + px
 				local colorIndex = buffer.readu8(ramBuf, vram + i)
 				local rgba = buffer.readu32(ramBuf, pal + (colorIndex * 4))
@@ -154,7 +180,9 @@ function GPU:Flush(x: number?, y: number?, w: number?, h: number?)
 		end
 	else
 		-- Full frame conversion (fallback)
-		local pixelCount = width * height
+		local w_val: number = width :: any
+		local h_val: number = height :: any
+		local pixelCount = w_val * h_val
 		for i = 0, pixelCount - 1 do
 			local colorIndex = buffer.readu8(ramBuf, vram + i)
 			local rgba = buffer.readu32(ramBuf, pal + (colorIndex * 4))
@@ -163,20 +191,23 @@ function GPU:Flush(x: number?, y: number?, w: number?, h: number?)
 	end
 
 	-- Upload full RGBA buffer to EditableImage
-	(self._editableImage :: any):WritePixelsBuffer(Vector2.new(0, 0), Vector2.new(width, height), rgbaBuf)
+	if self._editableImage then
+		(self._editableImage :: any):WritePixelsBuffer(Vector2.new(0, 0), Vector2.new(width, height), rgbaBuf)
+	end
 end
 
-function GPU:Clear(colorIndex: number)
-	self._ram:Fill(self._vramOffset, colorIndex or 0, self.Width * self.Height)
+function GPU.Clear(self: GPU, colorIndex: number)
+	local w, h = self.Width :: number, self.Height :: number
+	self._ram:Fill(self._vramOffset, colorIndex or 0, w * h)
 	self:Flush()
 end
 
-function GPU:Reset()
+function GPU.Reset(self: GPU)
 	self:InitPalette()
 	self:Clear(0)
 end
 
-function GPU:Scroll(dy: number, colorIndex: number)
+function GPU.Scroll(self: GPU, dy: number, colorIndex: number)
 	if dy <= 0 then
 		return
 	end
@@ -186,6 +217,50 @@ function GPU:Scroll(dy: number, colorIndex: number)
 
 	self._ram:Copy(self._vramOffset, self._vramOffset + offset, copySize)
 	self._ram:Fill(self._vramOffset + copySize, colorIndex or 0, offset)
+end
+
+function GPU.FillRect(self: GPU, x: number, y: number, w: number, h: number, colorIndex: number)
+	local width, height = self.Width, self.Height
+	local vram = self._vramOffset
+	local ramBuf = self._ram:GetBuffer()
+
+	-- Clipping
+	local x1 = math.max(0, x)
+	local y1 = math.max(0, y)
+	local x2 = math.min(width, x + w)
+	local y2 = math.min(height, y + h)
+
+	if x1 >= x2 or y1 >= y2 then
+		return
+	end
+
+	for py = y1, y2 - 1 do
+		local rowOffset = py * width
+		buffer.fill(ramBuf, vram + rowOffset + x1, colorIndex, x2 - x1)
+	end
+end
+
+function GPU.BitBlt(self: GPU, dx: number, dy: number, sx: number, sy: number, w: number, h: number)
+	local width, height = self.Width, self.Height
+	local vram = self._vramOffset
+	local ramBuf = self._ram:GetBuffer()
+
+	-- Very basic clipping for source and dest
+	-- Real implementation would handle partial overlaps better
+	if sx < 0 or sy < 0 or dx < 0 or dy < 0 then
+		return
+	end
+	if sx + w > width or sy + h > height or dx + w > width or dy + h > height then
+		return
+	end
+
+	-- Row by row copy using buffer.copy
+	-- buffer.copy handles overlapping memory correctly
+	for i = 0, h - 1 do
+		local srcOffset = (sy + i) * width + sx
+		local destOffset = (dy + i) * width + dx
+		buffer.copy(ramBuf, vram + destOffset, ramBuf, vram + srcOffset, w)
+	end
 end
 
 return GPU

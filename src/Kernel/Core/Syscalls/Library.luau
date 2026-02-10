@@ -1,8 +1,6 @@
---!strict
 local Library = {}
 
 function Library.Init(System: any, CallSyscall: (string, ...any) -> ...any)
-	local LuaVM = require(script.Parent.Parent.LuaVM)
 	local Loader = require(script.Parent.Parent.Loader)
 	local _libCache = {}
 
@@ -78,7 +76,7 @@ function Library.Init(System: any, CallSyscall: (string, ...any) -> ...any)
 				end
 
 				-- print(`[LIBRARY] Executing {name}...`)
-				local executionOk, executionResult = pcall(fn)
+				local executionOk, executionResult = pcall(fn :: any)
 				if not executionOk then
 					warn(`[KERNEL] LIB_LOAD: Execution error for '{name}': {executionResult}`)
 					return nil

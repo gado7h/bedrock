@@ -8,7 +8,7 @@ function LuaVM.Compile(source: string)
 		return compile(source, "UserChunk")
 	end)
 	if ok then
-		return result
+		return result, nil
 	else
 		return nil, result
 	end
@@ -19,7 +19,7 @@ function LuaVM.CreateExecutable(bytecode: string, env: { [any]: any }?)
 		return createExecutable(bytecode, env or {})
 	end)
 	if ok then
-		return result
+		return result, nil
 	else
 		return nil, result
 	end

@@ -1,4 +1,3 @@
---!strict
 -- Signal Constants (Unix-compatible numbers)
 
 local Signals = {}

@@ -1,4 +1,3 @@
---!strict
 local DataStoreService = game:GetService("DataStoreService")
 
 local HubService = {}
@@ -11,7 +10,7 @@ local function getStore()
 	return DataStoreService:GetDataStore(HUB_DATASTORE_NAME)
 end
 
-function HubService.HandleRequest(player: Player, op: string, namespace: string, repo: string, data: any)
+function HubService.HandleRequest(player, op, namespace, repo, data)
 	local store = getStore()
 	local key = string.format("%s/%s", namespace, repo)
 
@@ -23,18 +22,18 @@ function HubService.HandleRequest(player: Player, op: string, namespace: string,
 			return false, "Permission Denied: Cannot push to another user's namespace"
 		end
 
-		local success, err = pcall(function()
-			store:SetAsync(key, {
+		local success, pushErr = pcall(function()
+			local _ = store:SetAsync(key, { -- Assign to _ to suppress unused warning result
 				snapshot = data, -- Serialized VFS tree
 				author = player.Name,
-				updated = os.time()
+				updated = os.time(),
 			})
 		end)
 
 		if not success then
-			warn("[HubService] Push failed:", err)
+			warn("[HubService] Push failed:", pushErr)
 		end
-		return success, err
+		return success, tostring(pushErr)
 	elseif op == "PULL" then
 		local success, result = pcall(function()
 			return store:GetAsync(key)

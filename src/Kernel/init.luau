@@ -1,4 +1,3 @@
---!strict
 local RunService = game:GetService("RunService")
 
 local MemoryMap = require(script.Core.Memory.MemoryMap)
@@ -18,24 +17,80 @@ local Hub = require(script.HAL.Hub)
 
 local Kernel = {}
 
-function Kernel.Boot()
-	Log.info("KERNEL", "Initializing...")
+-- Kernel Configuration Type
+export type KernelConfig = {
+	Name: string?,
+	Version: string?,
+	BootScript: string?,
+	RAMSize: number?,
+	VideoWidth: number?,
+	VideoHeight: number?,
+	VFS: any?, -- Application specific VFS provisioning
+}
+
+local _config: KernelConfig = {
+	Name = "Bedrock",
+	Version = "1.0.0",
+	BootScript = "/boot.lua",
+	RAMSize = 512 * 1024 * 1024,
+	VideoWidth = 640,
+	VideoHeight = 360,
+}
+
+local _system = {}
+
+function Kernel.Init(config: KernelConfig?)
+	if config then
+		for k, v in pairs(config) do
+			_config[k] = v
+		end
+	end
+
+	Log.info("KERNEL", "Initializing %s v%s...", _config.Name, _config.Version)
 
 	-- 1. Hardware Initialization
-	local ram = RAM.new(500 * 1024 * 1024) -- 500MB Unified RAM
-	local gpu = GPU.new(ram, 320, 180)
+	local ram = RAM.new(_config.RAMSize)
+	local gpu = GPU.new(ram, _config.VideoWidth, _config.VideoHeight)
 	local hid = HID.new()
 	local network = Network.new()
 	local hub = Hub.new()
+	local hdd = require(script.HAL.FileSystem.HDD).new()
 
-	local VFS = require(script.Core.VFS) -- NEW
+	local VFS = require(script.Core.VFS)
+	local BIOS = require(script.Core.BIOS)
 
-	-- 2. Core Initialization
-	VFS.Init() -- Create default tree
+	-- 2. BIOS POST
+	local ok, _err = BIOS.InitHardware({
+		RAM = ram,
+		GPU = gpu,
+		HID = hid,
+		Network = network,
+		Hub = hub,
+		HDD = hdd,
+	})
 
-	-- 2b. Bootstrap / Provisioning (Flash "Disk")
+	if not ok then
+		-- BIOS Panic
+		gpu:Clear(4) -- Red
+		gpu:Flush()
+		error("BIOS POST Failed: " .. tostring(_err))
+	end
+
+	-- 3. Core Initialization
+	VFS.Init()
+	VFS.Mount("/dev/hdd", hdd)
+
+	-- 3b. Bootstrap / Provisioning (Flash "Disk")
 	local Bootstrap = require(script.Core.Bootstrap)
 	Bootstrap.Init(VFS)
+
+	-- Custom VFS Provisioning (if provided by Distro)
+	if _config.VFS then
+		Log.info("KERNEL", "Applying custom VFS provisioning...")
+		for path, content in pairs(_config.VFS) do
+			VFS.Write(path, content, 0, 0)
+		end
+	end
 
 	local scheduler = Scheduler.new(ram)
 	local Heap = require(script.Core.Memory.Heap)
@@ -53,24 +108,35 @@ function Kernel.Boot()
 		Hub = hub,
 	})
 
-	Log.info("KERNEL", "Hardware Initialized.")
+	_system = {
+		Scheduler = scheduler,
+		VFS = VFS,
+		BIOS = BIOS,
+		GPU = gpu,
+	}
+	
+	Log.info("KERNEL", "Initialization Complete. Ready to Start.")
+	return Kernel
+end
 
-	-- 3. Kernel Services (e.g. WindowManager would go here)
+function Kernel.Start()
+	if not _system.Scheduler then
+		error("Kernel not initialized! Call Kernel.Init() first.")
+	end
 
-	-- 4. BIOS / Bootloader Sequence
+	local VFS = _system.VFS
+	local BIOS = _system.BIOS
+	local scheduler = _system.Scheduler
+
+	-- 4. Hand over to BIOS for Booting
 	local function BootSequence()
-		Log.info("BIOS", "Searching for bootloader...")
-		local bootScript = VFS.Read("/sbin/main.lua", 0, 0)
-		if bootScript then
-			Log.info("BIOS", "Booting /sbin/main.lua ...")
-		end
-		local ok, pidOrErr = Syscalls.Call("EXEC", "/sbin/main.lua")
-
-		if not ok then
-			Log.fatal("BIOS", "Init failed: %s", tostring(pidOrErr))
-			-- Kernel Panic?
-			gpu:Clear(4) -- Red
-			gpu:Flush()
+		-- Try Distro BootScript first
+		if _config.BootScript and VFS.Stat(_config.BootScript) then
+			Log.info("KERNEL", "Booting custom script: %s", _config.BootScript)
+			Syscalls.Call("EXEC", _config.BootScript)
+		else
+			-- Fallback to standard BIOS boot
+			BIOS.Boot(VFS, Syscalls)
 		end
 	end
 
@@ -86,7 +152,7 @@ function Kernel.Boot()
 		-- Note: GPU flush is handled by userspace apps (libc.Graphics.Flush)
 	end)
 
-	Log.info("KERNEL", "Booted. Handing over to Scheduler.")
+	Log.info("KERNEL", "Kernel Started.")
 end
 
 return Kernel
