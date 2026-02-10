@@ -18,11 +18,13 @@ function Network.new(): Network
 	}, Network)
 
 	-- Locate the RemoteFunction
-	-- In a real boot scenario, we might wait for it, but for now we assume it exists or fail gracefully
-	self._remote = ReplicatedStorage:WaitForChild("PremiumOS_Network", 5)
+	local ServerFolder = ReplicatedStorage:WaitForChild("Server", 10)
+	if ServerFolder then
+		self._remote = ServerFolder:WaitForChild("Bedrock_Internet", 5) :: RemoteFunction?
+	end
 
 	if not self._remote then
-		warn("[KERNEL] Network HAL: Could not find 'PremiumOS_Network' RemoteFunction!")
+		warn("[KERNEL] Network HAL: Could not find 'Bedrock_Internet' RemoteFunction!")
 	end
 
 	return self

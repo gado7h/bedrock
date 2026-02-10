@@ -8,12 +8,16 @@ HDD.Async = true
 -- Kernel Init runs in a script. Script runs in Roblox Task Scheduler. Yielding is fine.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remotes = ReplicatedStorage:WaitForChild("PremiumOS_Remotes", 5)
-if not Remotes then
-	warn("[HDD] Remotes not found!")
+local ServerFolder = ReplicatedStorage:WaitForChild("Server", 10)
+local IO = nil
+
+if ServerFolder then
+	IO = ServerFolder:WaitForChild("Bedrock_HDD", 5) :: RemoteFunction?
 end
 
-local IO = Remotes and Remotes:WaitForChild("HDD_IO", 5)
+if not IO then
+	warn("[HDD] Bedrock_HDD remote not found!")
+end
 
 function HDD.Read(path, uid)
 	if not IO then

@@ -14,6 +14,7 @@ local Pipes = require(script.Core.Pipes)
 local Log = require(script.Core.Log)
 
 local RAM = require(script.HAL.RAM)
+local Hub = require(script.HAL.Hub)
 
 local Kernel = {}
 
@@ -25,6 +26,7 @@ function Kernel.Boot()
 	local gpu = GPU.new(ram, 320, 180)
 	local hid = HID.new()
 	local network = Network.new()
+	local hub = Hub.new()
 
 	local VFS = require(script.Core.VFS) -- NEW
 
@@ -48,6 +50,7 @@ function Kernel.Boot()
 		RAM = ram,
 		Heap = heap,
 		Network = network,
+		Hub = hub,
 	})
 
 	Log.info("KERNEL", "Hardware Initialized.")

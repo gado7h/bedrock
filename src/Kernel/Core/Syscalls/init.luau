@@ -8,6 +8,7 @@ local Process = require(script.Process)
 local Hardware = require(script.Hardware)
 local Network = require(script.Network)
 local Library = require(script.Library)
+local Hub = require(script.Hub)
 
 local Syscalls = {}
 
@@ -20,6 +21,7 @@ export type System = {
 	RAM: any,
 	Heap: any,
 	Network: any,
+	Hub: any,
 }
 
 local _system: System
@@ -74,6 +76,7 @@ function Syscalls.Init(system: System)
 	local hwHandlers = Hardware.Init(system)
 	local netHandlers = Network.Init(system)
 	local libHandlers = Library.Init(system, Call)
+	local hubHandlers = Hub.Init(system)
 
 	-- Merge Handlers
 	for k, v in pairs(fsHandlers) do
@@ -89,6 +92,9 @@ function Syscalls.Init(system: System)
 		HANDLERS[k] = v
 	end
 	for k, v in pairs(libHandlers) do
+		HANDLERS[k] = v
+	end
+	for k, v in pairs(hubHandlers) do
 		HANDLERS[k] = v
 	end
 

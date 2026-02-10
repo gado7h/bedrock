@@ -9,28 +9,33 @@ A lightweight, Unix-like kernel for Roblox OS emulation. Bedrock provides core O
 - **Virtual File System (VFS)**: Unix-like permissions (UID/GID/Mode), path caching, dynamic provisioning
 - **Process Scheduler**: Round-robin with signals, sleep heap optimization, memory limits
 - **Memory Management**: Heap allocator with first-fit strategy and block coalescing
-- **Hardware Abstraction Layer (HAL)**: GPU, HID, RAM, Network drivers
-- **System Calls**: 30+ syscalls for file I/O, processes, memory, and hardware
-- **Custom Lua VM**: Bytecode interpreter (FiOne + Yueliang) for sandboxed execution
+- **Bedrock Hub**: DataStore-backed repository sharing (PULL/PUSH)
+- **Internet Service**: Kernel-level WAN proxy (HTTP)
+- **HDD Persistence**: DataStore-backed storage for local files
+- **Hardware Abstraction Layer (HAL)**: GPU, HID, RAM drivers
+- **System Calls**: 30+ syscalls for file I/O, processes, memory, and networking
 
 ## 📦 Installation
 
-### As Git Submodule (Recommended)
+### Via pesde (Recommended)
 
 ```bash
-cd your-roblox-project
-git submodule add https://github.com/gado7h/bedrock.git bedrock
-git submodule update --init --recursive
+pesde add gado7h/bedrock
 ```
 
 ### Rojo Configuration
+
+Bedrock is now split into **Kernel** (client-side) and **Server** (host-side) components.
 
 ```json
 {
   "tree": {
     "ReplicatedStorage": {
       "Kernel": {
-        "$path": "bedrock/Kernel"
+        "$path": "pesde_packages/main/bedrock/src/Kernel"
+      },
+      "Server": {
+        "$path": "pesde_packages/main/bedrock/src/Server"
       }
     }
   }
@@ -39,92 +44,57 @@ git submodule update --init --recursive
 
 ## 🎯 Quick Start
 
-```luau
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Kernel = require(ReplicatedStorage.Kernel)
+Bedrock is a professional-grade kernel that requires a server-side component for networking and persistence.
 
--- Boot the kernel
+### 1. Initialize Host Services (Server)
+Ensure the `Server` folder is synced to `ReplicatedStorage`. The `init.server.luau` script will automatically handle RemoteFunction initialization.
+
+### 2. Boot the Kernel (Client)
+```luau
+local Kernel = require(ReplicatedStorage.Kernel)
 Kernel.Boot()
 ```
 
-### Network Configuration
+## 🌐 Network & Services
 
-Bedrock's network support is **optional** and requires a server-side implementation.
+Bedrock provide portable "Host Services" that run on the Roblox server to bridge kernel requests to Roblox APIs.
 
-#### Without Server (Standalone)
-```luau
-Kernel.Boot()  -- Network auto-disabled if no server found
-```
+### Bedrock Hub
+A decentralized DataStore-backed registry for sharing code.
+- `HUB_PUSH`: Upload current directory to the Hub.
+- `HUB_PULL`: Download repository snapshots.
 
-Network syscalls will return `false, "Network not available"`.
+### Internet Service
+Wraps `HttpService` for WAN access. Use the `NET_REQ` syscall to make asynchronous web requests.
 
-#### With Server (HTTP Proxy)
-Create a server-side RemoteFunction to enable network:
-
-```luau
--- ServerScriptService/NetworkProxy.server.luau
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local HttpService = game:GetService("HttpService")
-
-local remote = Instance.new("RemoteFunction")
-remote.Name = "PremiumOS_Network"
-remote.Parent = ReplicatedStorage
-
-remote.OnServerInvoke = function(player, method, url, body)
-    local success, response = pcall(function()
-        return HttpService:RequestAsync({
-            Url = url,
-            Method = method,
-            Body = body,
-            Headers = {
-                ["Content-Type"] = "application/json"
-            }
-        })
-    end)
-    
-    if success then
-        return response.Body
-    else
-        return nil, response  -- Error message
-    end
-end
-```
-
-Then boot normally:
-```luau
-Kernel.Boot()  -- Network auto-enabled when server is present
-```
+### HDD Persistence
+Automatically maps `/dev/hdd` to a per-player DataStore, ensuring files persist across sessions.
 
 ## 📚 Documentation
 
 - [Architecture Guide](docs/ARCHITECTURE.md) - System design and components
 - [API Reference](docs/API.md) - Complete syscall documentation
-- [Network Configuration](docs/NETWORK.md) - Server setup and usage
 - [Changelog](CHANGELOG.md) - Version history
 
 ## 🏗️ Architecture
 
 ```
-Kernel/
-├── Core/              # Kernel core components
-│   ├── VFS.luau       # Virtual file system
-│   ├── Scheduler.luau # Process scheduler  
-│   ├── Heap.luau      # Memory allocator
-│   ├── Bootstrap.luau # File provisioning
-│   ├── LuaVM/         # Lua VM (FiOne + Yueliang)
-│   └── Syscalls/      # System call handlers
-├── HAL/               # Hardware abstraction layer
-│   ├── GPU.luau       # Graphics driver (16-color palette)
-│   ├── HID.luau       # Input driver (keyboard/mouse)
-│   ├── RAM.luau       # Memory driver (unified buffer)
-│   └── Network.luau   # Network driver (HTTP)
-└── init.luau          # Kernel entry point
+src/
+├── Kernel/             # Core Kernel components (Client)
+│   ├── Core/           # VFS, Scheduler, Memory, Syscalls
+│   ├── HAL/            # Hardware drivers (GPU, HID, RAM, Hub)
+│   └── init.luau       # Kernel entry point
+└── Server/             # Host Services (Server / RunContext.Server)
+    ├── HubService.luau # DataStore Hub backend
+    ├── HDDService.luau # DataStore persistence backend
+    └── init.server.luau # Host service initializer
 ```
 
 ## 🔧 Requirements
 
 - **Roblox Studio** (latest version)
 - **Rojo** 7.x or higher (for syncing)
+- **pesde** (for package management)
 - **Luau** (strict mode recommended)
 
 ## 📖 Usage Examples
@@ -167,7 +137,7 @@ See the [examples/](examples/) directory for complete working examples:
 - **[03_processes.lua](examples/03_processes.lua)** - Process spawning and signals
 - **[04_network.lua](examples/04_network.lua)** - HTTP requests (requires server)
 
-Each example is fully documented and ready to run. See [examples/README.md](examples/README.md) for details.
+Each example is fully documented and ready to run.
 
 ## 🧪 Testing
 
@@ -175,18 +145,13 @@ Bedrock is tested as part of parent projects. See [PremiumOS](https://github.com
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please Open a Pull Request on GitHub.
 
 ## 📝 Version Compatibility
 
 | Bedrock Version | Compatible Projects | Notes |
 |----------------|---------------------|-------|
+| 1.1.x          | PremiumOS 1.x       | Added Hub, Internet, HDD |
 | 1.0.x          | PremiumOS 1.x       | Initial release |
 
 ## 📄 License
