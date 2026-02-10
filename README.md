@@ -47,10 +47,59 @@ local Kernel = require(ReplicatedStorage.Kernel)
 Kernel.Boot()
 ```
 
+### Network Configuration
+
+Bedrock's network support is **optional** and requires a server-side implementation.
+
+#### Without Server (Standalone)
+```luau
+Kernel.Boot()  -- Network auto-disabled if no server found
+```
+
+Network syscalls will return `false, "Network not available"`.
+
+#### With Server (HTTP Proxy)
+Create a server-side RemoteFunction to enable network:
+
+```luau
+-- ServerScriptService/NetworkProxy.server.luau
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
+
+local remote = Instance.new("RemoteFunction")
+remote.Name = "PremiumOS_Network"
+remote.Parent = ReplicatedStorage
+
+remote.OnServerInvoke = function(player, method, url, body)
+    local success, response = pcall(function()
+        return HttpService:RequestAsync({
+            Url = url,
+            Method = method,
+            Body = body,
+            Headers = {
+                ["Content-Type"] = "application/json"
+            }
+        })
+    end)
+    
+    if success then
+        return response.Body
+    else
+        return nil, response  -- Error message
+    end
+end
+```
+
+Then boot normally:
+```luau
+Kernel.Boot()  -- Network auto-enabled when server is present
+```
+
 ## 📚 Documentation
 
 - [Architecture Guide](docs/ARCHITECTURE.md) - System design and components
 - [API Reference](docs/API.md) - Complete syscall documentation
+- [Network Configuration](docs/NETWORK.md) - Server setup and usage
 - [Changelog](CHANGELOG.md) - Version history
 
 ## 🏗️ Architecture
@@ -108,6 +157,17 @@ Syscall("SIGNAL", pid, 9) -- SIGKILL
 -- List processes
 local processes = Syscall("PS_LIST")
 ```
+
+## 📝 Examples
+
+See the [examples/](examples/) directory for complete working examples:
+
+- **[01_basic_usage.lua](examples/01_basic_usage.lua)** - Core kernel features overview
+- **[02_filesystem.lua](examples/02_filesystem.lua)** - VFS operations and permissions
+- **[03_processes.lua](examples/03_processes.lua)** - Process spawning and signals
+- **[04_network.lua](examples/04_network.lua)** - HTTP requests (requires server)
+
+Each example is fully documented and ready to run. See [examples/README.md](examples/README.md) for details.
 
 ## 🧪 Testing
 
