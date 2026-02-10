@@ -149,13 +149,22 @@ function GPU.Flush(self: GPU, x: number?, y: number?, w: number?, h: number?)
 		local endX = math.clamp(x + w, 0, width)
 		local endY = math.clamp(y + h, 0, height)
 
-		local rowWidth = (endX - startX) * 4
-		for py = startY, endY - 1 do
-			local offset = (py * width + startX) * 4
-			buffer.copy(rgbaBuf, offset, ramBuf, vram + offset, rowWidth)
+		local rowWidth = endX - startX
+		if rowWidth == width then
+			-- Optimized: Full width copy for multiple rows
+			local offset = startY * width * 4
+			local totalSize = (endY - startY) * width * 4
+			buffer.copy(rgbaBuf, offset, ramBuf, vram + offset, totalSize)
+		else
+			-- Standard row-by-row clipping copy
+			local byteWidth = rowWidth * 4
+			for py = startY, endY - 1 do
+				local offset = (py * width + startX) * 4
+				buffer.copy(rgbaBuf, offset, ramBuf, vram + offset, byteWidth)
+			end
 		end
 	else
-		-- Full frame copy
+		-- Full frame copy (Native speed)
 		buffer.copy(rgbaBuf, 0, ramBuf, vram, width * height * 4)
 	end
 
