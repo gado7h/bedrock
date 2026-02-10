@@ -39,6 +39,11 @@ function Bootstrap.Init(VFS)
 	provisionFolder("sbin", "/sbin")
 	provisionFolder("etc", "/etc")
 
+    -- Ensure system directories exist
+    VFS.MkDir("/dev", 0, 0)
+    VFS.MkDir("/home", 0, 0)
+    VFS.MkDir("/home/root", 0, 0)
+
 	Log.info("BOOTSTRAP", "VFS Provisioning Complete (Dynamic).")
 end
 

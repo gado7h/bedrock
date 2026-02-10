@@ -149,6 +149,7 @@ function Syscalls.Init(system: System)
 		if Syscalls.BootSequence then
 			task.delay(0.5, function()
 				_system.HID.Enabled = true
+                if _system.GPU.Init then (_system.GPU :: any):Init() end
 				_system.Scheduler:Spawn("BIOS", Syscalls.BootSequence :: any)
 			end)
 		else
