@@ -80,9 +80,19 @@ function Kernel.Init(config: KernelConfig?)
 	VFS.Init()
 	VFS.Mount("/dev/hdd", hdd)
 
+	local scheduler = Scheduler.new(ram)
+	local Heap = require(script.Core.Memory.Heap)
+	local heap = Heap.new(ram, MemoryMap.HEAP_START, MemoryMap.HEAP_END)
+
 	-- 3b. Bootstrap / Provisioning (Flash "Disk")
+    -- Bootstrap needs VFS, GPU, Scheduler, Pipes
 	local Bootstrap = require(script.Core.Bootstrap)
-	Bootstrap.Init(VFS)
+	Bootstrap.Init({
+        VFS = VFS,
+        GPU = gpu,
+        Scheduler = scheduler,
+        Pipes = Pipes
+    })
 
 	-- Custom VFS Provisioning (if provided by Distro)
 	if _config.VFS then
@@ -91,10 +101,6 @@ function Kernel.Init(config: KernelConfig?)
 			VFS.Write(path, content, 0, 0)
 		end
 	end
-
-	local scheduler = Scheduler.new(ram)
-	local Heap = require(script.Core.Memory.Heap)
-	local heap = Heap.new(ram, MemoryMap.HEAP_START, MemoryMap.HEAP_END)
 
 	Syscalls.Init({
 		Scheduler = scheduler,

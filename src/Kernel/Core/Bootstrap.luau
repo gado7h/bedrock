@@ -4,7 +4,6 @@ function Bootstrap.Init(System)
     local VFS = System.VFS
     local _system = System
 	local Log = require(script.Parent.Log)
-	local Log = require(script.Parent.Log)
 	Log.info("BOOTSTRAP", "Dynamic provisioning starting...")
 
     -- Clear screen to remove "Rebooting..." text from previous session
@@ -21,7 +20,14 @@ function Bootstrap.Init(System)
 			return
 		end
 
-		VFS.MkDir(vfsPath, 0, 0)
+
+		if VFS and VFS.MkDir then
+			VFS.MkDir(vfsPath, 0, 0)
+		else
+			Log.error("BOOTSTRAP", "VFS.MkDir missing! VFS: %s", tostring(VFS))
+			return
+		end
+
 		for _, child in ipairs(folder:GetChildren()) do
 			if child:IsA("ModuleScript") then
 				local name = child.Name
