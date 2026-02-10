@@ -1,39 +1,51 @@
 -- This script runs on the Server due to RunContext.Server configuration in Rojo
-local HubService = require(script.Parent:WaitForChild("HubService"))
-local InternetService = require(script.Parent:WaitForChild("InternetService"))
-local HDDService = require(script.Parent:WaitForChild("HDDService"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local HubService = require(script:WaitForChild("HubService"))
+local InternetService = require(script:WaitForChild("InternetService"))
+local HDDService = require(script:WaitForChild("HDDService"))
 
 local function setup()
 	print("[Bedrock] Initializing Kernel Host Services...")
 
+	-- Create a unified bridge for the client HALs to find remotes
+	local hostFolder = ReplicatedStorage:FindFirstChild("Bedrock_Host")
+	if not hostFolder then
+		hostFolder = Instance.new("Folder")
+		hostFolder.Name = "Bedrock_Host"
+		hostFolder.Parent = ReplicatedStorage
+	end
+
 	-- 1. Hub Service
-	local hubRemote = Instance.new("RemoteFunction")
+	local hubRemote = hostFolder:FindFirstChild("Bedrock_Hub") or Instance.new("RemoteFunction")
 	hubRemote.Name = "Bedrock_Hub"
-	hubRemote.Parent = script.Parent
+	hubRemote.Parent = hostFolder
 
 	hubRemote.OnServerInvoke = function(player, op, namespace, repo, data)
 		return HubService.HandleRequest(player, op, namespace, repo, data)
 	end
 
 	-- 2. Internet Service
-	local internetRemote = Instance.new("RemoteFunction")
+	local internetRemote = hostFolder:FindFirstChild("Bedrock_Internet") or Instance.new("RemoteFunction")
 	internetRemote.Name = "Bedrock_Internet"
-	internetRemote.Parent = script.Parent
+	internetRemote.Parent = hostFolder
 
 	internetRemote.OnServerInvoke = function(player, method, url, headers, body)
 		return InternetService.HandleRequest(player, method, url, headers, body)
 	end
 
 	-- 3. HDD Service
-	local hddRemote = Instance.new("RemoteFunction")
+	local hddRemote = hostFolder:FindFirstChild("Bedrock_HDD") or Instance.new("RemoteFunction")
 	hddRemote.Name = "Bedrock_HDD"
-	hddRemote.Parent = script.Parent
+	hddRemote.Parent = hostFolder
 
 	hddRemote.OnServerInvoke = function(player, op, path, arg1)
 		return HDDService.HandleRequest(player, op, path, arg1)
 	end
 
-	print("[Bedrock] Host Services Ready.")
+	print("[Bedrock] Host Services Ready in ReplicatedStorage.Bedrock_Host")
 end
+
+setup()
 
 setup()

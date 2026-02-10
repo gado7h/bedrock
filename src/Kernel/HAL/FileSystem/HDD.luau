@@ -23,9 +23,9 @@ function HDD.new(): HDD
 end
 
 function HDD.Init(self: HDD): (boolean, string?)
-	local ServerFolder = ReplicatedStorage:WaitForChild("Server", 10)
-	if ServerFolder then
-		self._remote = ServerFolder:WaitForChild("Bedrock_HDD", 5) :: RemoteFunction?
+	local host = ReplicatedStorage:WaitForChild("Bedrock_Host", 10)
+	if host then
+		self._remote = host:WaitForChild("Bedrock_HDD", 5) :: RemoteFunction?
 	end
 
 	if not self._remote then

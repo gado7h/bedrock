@@ -19,9 +19,9 @@ function Hub.new(): Hub
 end
 
 function Hub.Init(self: Hub): (boolean, string?)
-	local ServerFolder = ReplicatedStorage:WaitForChild("Server", 10)
-	if ServerFolder then
-		self._remote = ServerFolder:WaitForChild("Bedrock_Hub", 5) :: RemoteFunction?
+	local host = ReplicatedStorage:WaitForChild("Bedrock_Host", 10)
+	if host then
+		self._remote = host:WaitForChild("Bedrock_Hub", 5) :: RemoteFunction?
 	end
 
 	if not self._remote then

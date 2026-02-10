@@ -20,9 +20,9 @@ end
 
 function Network:Init()
 	local self = self
-	local ServerFolder = ReplicatedStorage:WaitForChild("Server", 10)
-	if ServerFolder then
-		self._remote = ServerFolder:WaitForChild("Bedrock_Internet", 5)
+	local host = ReplicatedStorage:WaitForChild("Bedrock_Host", 10)
+	if host then
+		self._remote = host:WaitForChild("Bedrock_Internet", 5)
 	end
 
 	if not self._remote then
