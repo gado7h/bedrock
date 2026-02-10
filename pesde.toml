@@ -1,6 +1,9 @@
 name = "gado7h/bedrock"
 version = "1.1.0"
 description = "A lightweight Unix-like kernel for Roblox OS emulation"
+
+[indices]
+default = "https://github.com/pesde-pkg/index.git"
 authors = ["gado7h"]
 repository = "https://github.com/gado7h/bedrock"
 license = "MIT"
