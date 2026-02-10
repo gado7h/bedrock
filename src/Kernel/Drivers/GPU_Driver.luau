@@ -5,10 +5,11 @@
 local DevGPU = {}
 DevGPU.Name = "DevGPU"
 
-local GPU = require(script.Parent.Parent.GPU)
-local _gpu: GPU.GPU? = nil -- Injected in Init
+local GPU = require(script.Parent.Parent.HAL.GPU)
+type GPU = GPU.GPU
+local _gpu: GPU? = nil -- Injected in Init
 
-function DevGPU.Init(gpu: GPU.GPU)
+function DevGPU.Init(gpu: GPU)
 	_gpu = gpu
 end
 

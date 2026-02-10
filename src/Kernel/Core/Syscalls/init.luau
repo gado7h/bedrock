@@ -142,7 +142,7 @@ function Syscalls.Init(system: System)
 
 		-- Re-Provision Filesystem
 		local Bootstrap = require(script.Parent.Bootstrap)
-		Bootstrap.Init(_system.VFS)
+		Bootstrap.Init(_system)
 
 		Log.info("KERNEL", "System state cleared. Restarting BIOS in 500ms...")
 

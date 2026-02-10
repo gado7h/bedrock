@@ -1,8 +1,16 @@
 local Bootstrap = {}
 
-function Bootstrap.Init(VFS)
+function Bootstrap.Init(System)
+    local VFS = System.VFS
+    local _system = System
+	local Log = require(script.Parent.Log)
 	local Log = require(script.Parent.Log)
 	Log.info("BOOTSTRAP", "Dynamic provisioning starting...")
+
+    -- Clear screen to remove "Rebooting..." text from previous session
+    if System.GPU then
+        System.GPU:Clear(0) -- Clear to black
+    end
 
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local Userspace = ReplicatedStorage:WaitForChild("Userspace")
@@ -44,13 +52,18 @@ function Bootstrap.Init(VFS)
     VFS.MkDir("/home", 0, 0)
     VFS.MkDir("/home/root", 0, 0)
 
-    -- Create Device Nodes (Placeholders for drivers)
-    VFS.Write("/dev/devgpu", "GPU DRIVER INTERFACE", 0, 0)
-    VFS.Write("/dev/devtty", "TTY INTERFACE", 0, 0)
-    VFS.Write("/dev/hdd", "HDD INTERFACE", 0, 0)
+    -- Configure Drivers
+    local GPU_Driver = require(script.Parent.Parent.Drivers.GPU_Driver)
+    GPU_Driver.Init(_system.GPU)
+    VFS.Mount("/dev/gpu", GPU_Driver)
 
-    -- Create Default Files
-    VFS.Write("/home/root/readme.txt", "Welcome to PremiumOS v1.0!\n\nThis is a multiuser, multitasking operating system running on Bedrock Kernel.\n\nCommands:\n- ls: List files\n- cd: Change directory\n- cat: Read file\n- nano: Edit file\n- ps: Process list\n- kill: Terminate process\n- reboot: Restart system\n", 0, 0)
+    local TTY_Driver = require(script.Parent.Parent.Drivers.TTY_Driver)
+    TTY_Driver.Init(_system.Scheduler, _system.Pipes)
+    VFS.Mount("/dev/tty", TTY_Driver)
+    
+    -- NOTE: HDD driver is usually handled by the HDD Service or Hub, 
+    -- but if we had a dedicated driver file we would mount it here too.
+    -- For now, /dev/hdd remains a placeholder or we can implement a stub driver later.
 
 	Log.info("BOOTSTRAP", "VFS Provisioning Complete (Dynamic).")
 end
