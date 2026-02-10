@@ -9,6 +9,7 @@ function Bootstrap.Init(System)
     -- Clear screen to remove "Rebooting..." text from previous session
     if System.GPU then
         System.GPU:Clear(0) -- Clear to black
+        System.GPU:Flush() -- REQUIRED to actually blank the screen
     end
 
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -31,8 +32,11 @@ function Bootstrap.Init(System)
 		for _, child in ipairs(folder:GetChildren()) do
 			if child:IsA("ModuleScript") then
 				local name = child.Name
-				-- Convert .luau name to .lua for VFS (tradition)
-				local vfsFileName = vfsPath .. "/" .. name .. ".lua"
+				-- Only append .lua if no extension exists
+                local vfsFileName = vfsPath .. "/" .. name
+                if not string.find(name, "%.") then
+                    vfsFileName = vfsFileName .. ".lua"
+                end
 
 				local success, result = pcall(require, child)
 				if success then
@@ -58,6 +62,11 @@ function Bootstrap.Init(System)
     VFS.MkDir("/home", 0, 0)
     VFS.MkDir("/home/root", 0, 0)
 
+    -- Create Device Nodes (Placeholders so they appear in 'ls')
+    VFS.Write("/dev/gpu", "GPU DRIVER", 0, 0)
+    VFS.Write("/dev/tty", "TTY DRIVER", 0, 0)
+    VFS.Write("/dev/hdd", "HDD DRIVER", 0, 0)
+
     -- Configure Drivers
     local GPU_Driver = require(script.Parent.Parent.Drivers.GPU_Driver)
     GPU_Driver.Init(_system.GPU)
@@ -67,9 +76,13 @@ function Bootstrap.Init(System)
     TTY_Driver.Init(_system.Scheduler, _system.Pipes)
     VFS.Mount("/dev/tty", TTY_Driver)
     
-    -- NOTE: HDD driver is usually handled by the HDD Service or Hub, 
-    -- but if we had a dedicated driver file we would mount it here too.
-    -- For now, /dev/hdd remains a placeholder or we can implement a stub driver later.
+    local HDD_Driver = require(script.Parent.Parent.Drivers.HDD_Driver)
+    -- HDD instance is already initialized and passed in _system.HDD if we wanted, 
+    -- but usually it's just mounted. 
+    -- If _system has the hdd instance (from init.luau), we can mount its FS part.
+    if _system.HDD then
+        VFS.Mount("/dev/hdd", _system.HDD)
+    end
 
 	Log.info("BOOTSTRAP", "VFS Provisioning Complete (Dynamic).")
 end

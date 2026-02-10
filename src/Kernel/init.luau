@@ -54,7 +54,7 @@ function Kernel.Init(config: KernelConfig?)
 	local hid = HID.new()
 	local network = Network.new()
 	local hub = Hub.new()
-	local hdd = require(script.HAL.FileSystem.HDD).new()
+	local hdd = require(script.Drivers.HDD_Driver).new()
 
 	local VFS = require(script.Core.VFS)
 	local BIOS = require(script.Core.BIOS)
@@ -119,6 +119,7 @@ function Kernel.Init(config: KernelConfig?)
 		VFS = VFS,
 		BIOS = BIOS,
 		GPU = gpu,
+        HDD = hdd,
 	}
 	
 	Log.info("KERNEL", "Initialization Complete. Ready to Start.")

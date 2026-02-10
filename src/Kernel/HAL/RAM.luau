@@ -72,6 +72,15 @@ function RAM.Fill(self, addr, val, size)
 	buffer.fill(self._buffer, addr, val, size)
 end
 
+function RAM.Fill32(self, addr, val, size)
+	if addr < 0 or (addr + size) > self.Size then
+		return
+	end
+	for i = 0, size - 4, 4 do
+		buffer.writeu32(self._buffer, addr + i, val)
+	end
+end
+
 function RAM.GetBuffer(self)
 	return self._buffer
 end

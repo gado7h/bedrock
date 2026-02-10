@@ -176,7 +176,7 @@ end
 
 function GPU.Clear(self: GPU, colorRGBA: number)
 	local w, h = self.Width :: number, self.Height :: number
-	self._ram:Fill(self._vramOffset, colorRGBA or 0, w * h * 4)
+	self._ram:Fill32(self._vramOffset, colorRGBA or 0, w * h * 4)
 	self:Flush()
 end
 
@@ -194,7 +194,7 @@ function GPU.Scroll(self: GPU, dy: number, colorRGBA: number)
 	local offset = dy * stride
 
 	self._ram:Copy(self._vramOffset, self._vramOffset + offset, copySize)
-	self._ram:Fill(self._vramOffset + copySize, colorRGBA or 0, offset)
+	self._ram:Fill32(self._vramOffset + copySize, colorRGBA or 0, offset)
 end
 
 function GPU.FillRect(self: GPU, x: number, y: number, w: number, h: number, colorRGBA: number)
@@ -215,7 +215,7 @@ function GPU.FillRect(self: GPU, x: number, y: number, w: number, h: number, col
 	local rectWidth = (x2 - x1) * 4
 	for py = y1, y2 - 1 do
 		local rowOffset = (py * width + x1) * 4
-		buffer.fill(ramBuf, vram + rowOffset, colorRGBA, rectWidth)
+		self._ram:Fill32(vram + rowOffset, colorRGBA, rectWidth)
 	end
 end
 
