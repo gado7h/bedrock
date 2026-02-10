@@ -1,0 +1,9 @@
+{
+    "name": "Bedrock",
+    "tree": {
+        "$className": "Folder",
+        "Kernel": {
+            "$path": "Kernel"
+        }
+    }
+}
