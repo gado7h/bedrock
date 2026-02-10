@@ -4,7 +4,7 @@ description = "A lightweight Unix-like kernel for Roblox OS emulation"
 authors = ["gado7h"]
 repository = "https://github.com/gado7h/bedrock"
 license = "MIT"
-includes = ["src", "pesde.toml", "default.project.json", "README.md", "CHANGELOG.md"]
+includes = ["src", "pesde.toml", "README.md", "CHANGELOG.md", "docs"]
 
 [target]
 environment = "roblox"
