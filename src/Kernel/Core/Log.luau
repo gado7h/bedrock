@@ -34,6 +34,13 @@ local function log(level: LogLevel, subsystem: string, msg: string, ...: any)
 
 	local formatted = formatMessage(level, subsystem, msg, ...)
 
+	-- Also print to Roblox Output for real-time kernel debugging
+	if level == "ERROR" or level == "FATAL" then
+		warn(formatted)
+	else
+		print(formatted)
+	end
+
 	-- Circular Buffer Write
 	if _count < MAX_LOGS then
 		_klog[_head] = formatted

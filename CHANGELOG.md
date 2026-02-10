@@ -46,6 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture guide
 - Complete API reference
 
+## [1.2.3] - 2026-02-10
+
+### Fixed
+- **Memory Map Overlap**: Expanded internal memory map to prevent VRAM from overflowing into the palette region at higher resolutions (640x360+).
+- **Infinite Service Init Hang**: Added timeouts to server-side service loading to prevent the kernel from hanging indefinitely if a file is missing or correctly mapped.
+- **Kernel Debug Visibility**: Enabled kernel-to-Studio log redirection by default to aid in troubleshooting boot failures.
+
 ## [1.2.2] - 2026-02-10
 
 ### Fixed

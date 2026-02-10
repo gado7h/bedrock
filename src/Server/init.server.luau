@@ -1,9 +1,18 @@
 -- This script runs on the Server due to RunContext.Server configuration in Rojo
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local HubService = require(script:WaitForChild("HubService"))
-local InternetService = require(script:WaitForChild("InternetService"))
-local HDDService = require(script:WaitForChild("HDDService"))
+local HubServiceModule = script:WaitForChild("HubService", 5)
+local InternetServiceModule = script:WaitForChild("InternetService", 5)
+local HDDServiceModule = script:WaitForChild("HDDService", 5)
+
+if not HubServiceModule or not InternetServiceModule or not HDDServiceModule then
+	warn("[Bedrock] CRITICAL: Host services (Hub/Internet/HDD) failed to load within 5s!")
+	return
+end
+
+local HubService = require(HubServiceModule)
+local InternetService = require(InternetServiceModule)
+local HDDService = require(HDDServiceModule)
 
 local function setup()
 	print("[Bedrock] Initializing Kernel Host Services...")
@@ -45,7 +54,5 @@ local function setup()
 
 	print("[Bedrock] Host Services Ready in ReplicatedStorage.Bedrock_Host")
 end
-
-setup()
 
 setup()
