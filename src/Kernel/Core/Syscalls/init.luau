@@ -140,6 +140,9 @@ function Syscalls.Init(system: System)
 		(_system.Scheduler :: any).SearchQueue = {}
 		_system.Scheduler.Halted = false
 
+		-- Clear Buffered Output
+		Call("CLEAR_STDOUT")
+
 		-- Re-Provision Filesystem
 		local Bootstrap = require(script.Parent.Bootstrap)
 		Bootstrap.Init(_system)

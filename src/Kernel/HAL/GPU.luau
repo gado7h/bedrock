@@ -133,8 +133,6 @@ end
 
 -- Directly copies 32-bit RGBA data from RAM to the display buffer
 function GPU.Flush(self: GPU, x: number?, y: number?, w: number?, h: number?)
-	local frameCount = (self :: any)._frameCount :: number
-	(self :: any)._frameCount = frameCount + 1
 	local ramBuf = self._ram:GetBuffer()
 	local rgbaBuf = self._rgbaBuffer
 	local vram = self._vramOffset
@@ -142,31 +140,9 @@ function GPU.Flush(self: GPU, x: number?, y: number?, w: number?, h: number?)
 	local height: number = (self :: any).Height :: number
 
 	-- 32-bit mode: RAM is already in RGBA8 format. 
-	-- We just copy the relevant portions to our upload buffer.
-	if x and y and w and h and w > 0 and h > 0 then
-		local startX = math.clamp(x, 0, width)
-		local startY = math.clamp(y, 0, height)
-		local endX = math.clamp(x + w, 0, width)
-		local endY = math.clamp(y + h, 0, height)
-
-		local rowWidth = endX - startX
-		if rowWidth == width then
-			-- Optimized: Full width copy for multiple rows
-			local offset = startY * width * 4
-			local totalSize = (endY - startY) * width * 4
-			buffer.copy(rgbaBuf, offset, ramBuf, vram + offset, totalSize)
-		else
-			-- Standard row-by-row clipping copy
-			local byteWidth = rowWidth * 4
-			for py = startY, endY - 1 do
-				local offset = (py * width + startX) * 4
-				buffer.copy(rgbaBuf, offset, ramBuf, vram + offset, byteWidth)
-			end
-		end
-	else
-		-- Full frame copy (Native speed)
-		buffer.copy(rgbaBuf, 0, ramBuf, vram, width * height * 4)
-	end
+	-- Always do full full copy to prevent sync issues with partial dirty rects
+    -- and scrolling.
+    buffer.copy(rgbaBuf, 0, ramBuf, vram, width * height * 4)
 
 	-- Upload full RGBA buffer to EditableImage
 	if self._editableImage then

@@ -69,6 +69,10 @@ function Hardware.Init(System: any)
 			return batch
 		end,
 
+		["CLEAR_STDOUT"] = function()
+			_stdoutQueue = {}
+		end,
+
 		["PIPE_OPEN"] = function()
 			local handle = System.Pipes.Open()
 			local pid = System.Scheduler.CurrentPID
