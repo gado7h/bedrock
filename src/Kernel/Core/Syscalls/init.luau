@@ -141,7 +141,7 @@ function Syscalls.Init(system: System)
 		_system.Scheduler.Halted = false
 
 		-- Re-Provision Filesystem
-		local Bootstrap = require(script.Parent.Parent.Bootstrap)
+		local Bootstrap = require(script.Parent.Bootstrap)
 		Bootstrap.Init(_system.VFS)
 
 		Log.info("KERNEL", "System state cleared. Restarting BIOS in 500ms...")

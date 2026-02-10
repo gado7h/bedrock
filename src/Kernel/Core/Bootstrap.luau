@@ -44,6 +44,14 @@ function Bootstrap.Init(VFS)
     VFS.MkDir("/home", 0, 0)
     VFS.MkDir("/home/root", 0, 0)
 
+    -- Create Device Nodes (Placeholders for drivers)
+    VFS.Write("/dev/devgpu", "GPU DRIVER INTERFACE", 0, 0)
+    VFS.Write("/dev/devtty", "TTY INTERFACE", 0, 0)
+    VFS.Write("/dev/hdd", "HDD INTERFACE", 0, 0)
+
+    -- Create Default Files
+    VFS.Write("/home/root/readme.txt", "Welcome to PremiumOS v1.0!\n\nThis is a multiuser, multitasking operating system running on Bedrock Kernel.\n\nCommands:\n- ls: List files\n- cd: Change directory\n- cat: Read file\n- nano: Edit file\n- ps: Process list\n- kill: Terminate process\n- reboot: Restart system\n", 0, 0)
+
 	Log.info("BOOTSTRAP", "VFS Provisioning Complete (Dynamic).")
 end
 
