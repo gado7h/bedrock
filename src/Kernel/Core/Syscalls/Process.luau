@@ -14,7 +14,9 @@ function Process.Init(System, Call)
 		local Loader = require(script.Parent.Parent.Parent.Utils.Loader)
 		local procEnv = env or {}
 		local pid = scheduler:Spawn(path, function()
-			local executable, _loadErr = Loader.LoadString(System, content, procEnv)
+			local proc = scheduler.Processes[(scheduler :: any).CurrentPID]
+			local env = if proc then proc.Env else procEnv
+			local executable, _loadErr = Loader.LoadString(System, content, env)
 			if executable then
 				executable()
 			else

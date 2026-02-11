@@ -20,6 +20,7 @@ export type Scheduler = {
 	_sleepHeap: { number },
 	_tickets: number,
 	OnProcessCrash: ((number, string) -> ())?,
+	SyscallHandler: ((string, ...any) -> ...any)?,
 	Halted: boolean,
 	Kill: (self: Scheduler, pid: number) -> boolean,
 	Spawn: (self: Scheduler, name: string, entry: () -> (), initialEnv: { [string]: string }?) -> number,
@@ -503,18 +504,34 @@ function Scheduler:Schedule(dt: number)
 		proc.StartTime = os.clock()
 
 		if proc.Thread then
-			local success, result = coroutine.resume(proc.Thread, dt)
-			local elapsed = (os.clock() - proc.StartTime) * 1000
-			(proc :: any).TotalTime += elapsed
+			local results = table.pack(coroutine.resume(proc.Thread, table.unpack(proc.SyscallResult or { dt })))
+			proc.SyscallResult = nil
 
+			local elapsed = (os.clock() - proc.StartTime) * 1000
+			;(proc :: any).TotalTime += elapsed
+
+			local success = results[1]
 			if not success then
-				Log.warn("KERNEL", "Process %d crashed: %s", pid, tostring(result))
+				local err = results[2]
+				Log.warn("KERNEL", "Process %d crashed: %s", pid, tostring(err))
 				if self.OnProcessCrash then
-					self.OnProcessCrash(pid, tostring(result))
+					self.OnProcessCrash(pid, tostring(err))
 				end
-				(proc :: any).State = "DEAD"
+				;(proc :: any).State = "DEAD"
 			elseif coroutine.status(proc.Thread) == "dead" then
-				(proc :: any).State = "DEAD"
+				;(proc :: any).State = "DEAD"
+			else
+				-- Thread yielded.
+				local syscallName = results[2]
+				if type(syscallName) == "string" and self.SyscallHandler then
+					-- Sycall trap!
+					local syscallArgs = {}
+					for i = 3, results.n do
+						table.insert(syscallArgs, results[i])
+					end
+					proc.SyscallResult = table.pack(self.SyscallHandler(syscallName, table.unpack(syscallArgs)))
+				end
+				-- Process remains READY to be resumed in next tick or tail
 			end
 		elseif proc.CPU then
 			local cpu = proc.CPU

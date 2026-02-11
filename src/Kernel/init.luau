@@ -86,6 +86,8 @@ function Kernel.Init(Hardware, Config)
 		Hub = Hardware.Hub,
 	})
 
+	scheduler.SyscallHandler = Syscalls.Call
+
 	_system = {
 		Scheduler = scheduler,
 		VFS = VFS,
