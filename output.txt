@@ -1,54 +1,55 @@
-  13:24:38.687  [Bedrock] Initializing Kernel Host Services...  -  Server - KernelServer:18
-  13:24:38.687  [Bedrock] Host Services Ready in ReplicatedStorage.Bedrock_Host  -  Server - KernelServer:55
-  13:24:38.847  Powering On Bedrock System...  -  Client - Boot:66
-  13:24:38.938  [MOTHERBOARD] Power On sequence initiated.  -  Client - Motherboard:71
-  13:24:38.939  [BIOS] Voyager-1 BIOS v1.0.0 initializing...  -  Client - BIOS:7
-  13:24:38.939  [BIOS] RAM Test: 512MB OK  -  Client - BIOS:17
-  13:24:38.944  [BIOS] GPU initialized.  -  Client - BIOS:22
-  13:24:38.945  [BIOS] HID initialized.  -  Client - BIOS:25
-  13:24:38.945  [BIOS] Service bridges connected.  -  Client - BIOS:30
-  13:24:38.945  [BOOTLOADER] Searching for Kernel bundle...  -  Client - Bootloader:7
-  13:24:38.949  [BOOTLOADER] Transferring control to Kernel...  -  Client - Bootloader:14
-  13:24:38.949  [10188.4010] [INFO] [KERNEL] Bedrock Kernel v2.0.0 starting...  -  Client - Log:44
-  13:24:38.949  [10188.4011] [INFO] [KERNEL] Probing hardware...  -  Client - Log:44
-  13:24:38.950  [10188.4013] [INFO] [VFS] Mounted DevGPU at /dev/gpu  -  Client - Log:44
-  13:24:38.950  [10188.4016] [INFO] [VFS] Mounted DevTTY at /dev/tty  -  Client - Log:44
-  13:24:38.950  [10188.4019] [INFO] [VFS] Mounted DevHDD at /dev/hdd  -  Client - Log:44
-  13:24:38.950  [10188.4020] [INFO] [BOOTSTRAP] Mounting InitRD from ReplicatedStorage/Userspace...  -  Client - Log:44
-  13:24:38.951  [10188.4022] [INFO] [BOOTSTRAP] Provisioned /bin/reboot.lua  -  Client - Log:44
-  13:24:38.951  [10188.4023] [INFO] [BOOTSTRAP] Provisioned /bin/wait.lua  -  Client - Log:44
-  13:24:38.951  [10188.4024] [INFO] [BOOTSTRAP] Provisioned /bin/grep.lua  -  Client - Log:44
-  13:24:38.951  [10188.4026] [INFO] [BOOTSTRAP] Provisioned /bin/lag.lua  -  Client - Log:44
-  13:24:38.951  [10188.4027] [INFO] [BOOTSTRAP] Provisioned /bin/rbx.lua  -  Client - Log:44
-  13:24:38.951  [10188.4028] [INFO] [BOOTSTRAP] Provisioned /bin/colorstest.lua  -  Client - Log:44
-  13:24:38.951  [10188.4029] [INFO] [BOOTSTRAP] Provisioned /bin/rm.lua  -  Client - Log:44
-  13:24:38.951  [10188.4030] [INFO] [BOOTSTRAP] Provisioned /bin/chmod.lua  -  Client - Log:44
-  13:24:38.951  [10188.4030] [INFO] [BOOTSTRAP] Provisioned /bin/ls.lua  -  Client - Log:44
-  13:24:38.951  [10188.4031] [INFO] [BOOTSTRAP] Provisioned /bin/cat.lua  -  Client - Log:44
-  13:24:38.952  [10188.4032] [INFO] [BOOTSTRAP] Provisioned /bin/libtest.lua  -  Client - Log:44
-  13:24:38.952  [10188.4034] [INFO] [BOOTSTRAP] Provisioned /bin/env.lua  -  Client - Log:44
-  13:24:38.952  [10188.4036] [INFO] [BOOTSTRAP] Provisioned /bin/shutdown.lua  -  Client - Log:44
-  13:24:38.952  [10188.4037] [INFO] [BOOTSTRAP] Provisioned /bin/sh.lua  -  Client - Log:44
-  13:24:38.952  [10188.4038] [INFO] [BOOTSTRAP] Provisioned /bin/asm.lua  -  Client - Log:44
-  13:24:38.952  [10188.4039] [INFO] [BOOTSTRAP] Provisioned /bin/chown.lua  -  Client - Log:44
-  13:24:38.952  [10188.4040] [INFO] [BOOTSTRAP] Provisioned /bin/name.lua  -  Client - Log:44
-  13:24:38.952  [10188.4041] [INFO] [BOOTSTRAP] Provisioned /bin/nano.lua  -  Client - Log:44
-  13:24:38.953  [10188.4042] [INFO] [BOOTSTRAP] Provisioned /lib/colors.lua  -  Client - Log:44
-  13:24:38.953  [10188.4043] [INFO] [BOOTSTRAP] Provisioned /lib/Font.lua  -  Client - Log:44
-  13:24:38.953  [10188.4044] [INFO] [BOOTSTRAP] Provisioned /lib/input.lua  -  Client - Log:44
-  13:24:38.953  [10188.4044] [INFO] [BOOTSTRAP] Provisioned /lib/Console.lua  -  Client - Log:44
-  13:24:38.953  [10188.4046] [INFO] [BOOTSTRAP] Provisioned /lib/ui.lua  -  Client - Log:44
-  13:24:38.953  [10188.4047] [INFO] [BOOTSTRAP] Provisioned /lib/libc.lua  -  Client - Log:44
-  13:24:38.953  [10188.4048] [INFO] [BOOTSTRAP] Provisioned /lib/utils.lua  -  Client - Log:44
-  13:24:38.953  [10188.4049] [INFO] [BOOTSTRAP] Provisioned /sbin/main.lua  -  Client - Log:44
-  13:24:38.953  [10188.4050] [INFO] [BOOTSTRAP] Provisioned /etc/hello_low.asm  -  Client - Log:44
-  13:24:38.953  [10188.4051] [INFO] [BOOTSTRAP] Provisioned /etc/clear.asm  -  Client - Log:44
-  13:24:38.954  [10188.4052] [INFO] [BOOTSTRAP] Provisioned /etc/.init  -  Client - Log:44
-  13:24:38.954  [10188.4053] [INFO] [BOOTSTRAP] InitRD Mounted.  -  Client - Log:44
-  13:24:38.955  [10188.4067] [INFO] [KERNEL] Kernel initialized successfully.  -  Client - Log:44
-  13:24:38.955  [10188.4069] [INFO] [SCHEDULER] Spawned Process 1: Init (Priority: 1)  -  Client - Log:44
-  13:24:38.955  [10188.4070] [INFO] [KERNEL] Kernel main loop started.  -  Client - Log:44
-  13:24:39.465  [10188.9162] [INFO] [KERNEL] Spawning init process (PID 1) via ASM...  -  Client - Log:44
-  13:24:39.484  [10188.9359] [INFO] [SCHEDULER] Spawned Process 2: /bin/asm.lua (Priority: 1)  -  Client - Log:44
-  13:24:40.055  DEBUG: Executing process with args: 3  -  Client - Process:41
-  13:24:40.188  [TTY] /  -  Client - DevTTY:51
+  13:27:26.123  [Bedrock] Initializing Kernel Host Services...  -  Server - KernelServer:18
+  13:27:26.123  [Bedrock] Host Services Ready in ReplicatedStorage.Bedrock_Host  -  Server - KernelServer:55
+  13:27:26.352  Powering On Bedrock System...  -  Client - Boot:66
+  13:27:26.446  [MOTHERBOARD] Power On sequence initiated.  -  Client - Motherboard:71
+  13:27:26.447  [BIOS] Voyager-1 BIOS v1.0.0 initializing...  -  Client - BIOS:7
+  13:27:26.447  [BIOS] RAM Test: 512MB OK  -  Client - BIOS:17
+  13:27:26.452  [BIOS] GPU initialized.  -  Client - BIOS:22
+  13:27:26.453  [BIOS] HID initialized.  -  Client - BIOS:25
+  13:27:26.453  [BIOS] Service bridges connected.  -  Client - BIOS:30
+  13:27:26.453  [BOOTLOADER] Searching for Kernel bundle...  -  Client - Bootloader:7
+  13:27:26.459  [BOOTLOADER] Transferring control to Kernel...  -  Client - Bootloader:14
+  13:27:26.459  [10355.9108] [INFO] [KERNEL] Bedrock Kernel v2.0.0 starting...  -  Client - Log:44
+  13:27:26.459  [10355.9111] [INFO] [KERNEL] Probing hardware...  -  Client - Log:44
+  13:27:26.460  [10355.9116] [INFO] [VFS] Mounted DevGPU at /dev/gpu  -  Client - Log:44
+  13:27:26.461  [10355.9123] [INFO] [VFS] Mounted DevTTY at /dev/tty  -  Client - Log:44
+  13:27:26.461  [10355.9130] [INFO] [VFS] Mounted DevHDD at /dev/hdd  -  Client - Log:44
+  13:27:26.462  [10355.9133] [INFO] [BOOTSTRAP] Mounting InitRD from ReplicatedStorage/Userspace...  -  Client - Log:44
+  13:27:26.462  [10355.9137] [INFO] [BOOTSTRAP] Provisioned /bin/env.lua  -  Client - Log:44
+  13:27:26.462  [10355.9139] [INFO] [BOOTSTRAP] Provisioned /bin/cat.lua  -  Client - Log:44
+  13:27:26.462  [10355.9141] [INFO] [BOOTSTRAP] Provisioned /bin/colorstest.lua  -  Client - Log:44
+  13:27:26.463  [10355.9143] [INFO] [BOOTSTRAP] Provisioned /bin/nano.lua  -  Client - Log:44
+  13:27:26.463  [10355.9145] [INFO] [BOOTSTRAP] Provisioned /bin/chown.lua  -  Client - Log:44
+  13:27:26.463  [10355.9148] [INFO] [BOOTSTRAP] Provisioned /bin/lag.lua  -  Client - Log:44
+  13:27:26.463  [10355.9150] [INFO] [BOOTSTRAP] Provisioned /bin/rm.lua  -  Client - Log:44
+  13:27:26.464  [10355.9152] [INFO] [BOOTSTRAP] Provisioned /bin/chmod.lua  -  Client - Log:44
+  13:27:26.464  [10355.9153] [INFO] [BOOTSTRAP] Provisioned /bin/wait.lua  -  Client - Log:44
+  13:27:26.464  [10355.9155] [INFO] [BOOTSTRAP] Provisioned /bin/sh.lua  -  Client - Log:44
+  13:27:26.464  [10355.9157] [INFO] [BOOTSTRAP] Provisioned /bin/ls.lua  -  Client - Log:44
+  13:27:26.464  [10355.9159] [INFO] [BOOTSTRAP] Provisioned /bin/reboot.lua  -  Client - Log:44
+  13:27:26.465  [10355.9162] [INFO] [BOOTSTRAP] Provisioned /bin/grep.lua  -  Client - Log:44
+  13:27:26.465  [10355.9163] [INFO] [BOOTSTRAP] Provisioned /bin/asm.lua  -  Client - Log:44
+  13:27:26.465  [10355.9165] [INFO] [BOOTSTRAP] Provisioned /bin/libtest.lua  -  Client - Log:44
+  13:27:26.465  [10355.9167] [INFO] [BOOTSTRAP] Provisioned /bin/shutdown.lua  -  Client - Log:44
+  13:27:26.465  [10355.9171] [INFO] [BOOTSTRAP] Provisioned /bin/name.lua  -  Client - Log:44
+  13:27:26.466  [10355.9173] [INFO] [BOOTSTRAP] Provisioned /bin/rbx.lua  -  Client - Log:44
+  13:27:26.466  [10355.9175] [INFO] [BOOTSTRAP] Provisioned /lib/utils.lua  -  Client - Log:44
+  13:27:26.466  [10355.9177] [INFO] [BOOTSTRAP] Provisioned /lib/libc.lua  -  Client - Log:44
+  13:27:26.466  [10355.9178] [INFO] [BOOTSTRAP] Provisioned /lib/input.lua  -  Client - Log:44
+  13:27:26.466  [10355.9180] [INFO] [BOOTSTRAP] Provisioned /lib/Console.lua  -  Client - Log:44
+  13:27:26.467  [10355.9182] [INFO] [BOOTSTRAP] Provisioned /lib/colors.lua  -  Client - Log:44
+  13:27:26.467  [10355.9184] [INFO] [BOOTSTRAP] Provisioned /lib/Font.lua  -  Client - Log:44
+  13:27:26.467  [10355.9186] [INFO] [BOOTSTRAP] Provisioned /lib/ui.lua  -  Client - Log:44
+  13:27:26.467  [10355.9189] [INFO] [BOOTSTRAP] Provisioned /sbin/main.lua  -  Client - Log:44
+  13:27:26.468  [10355.9192] [INFO] [BOOTSTRAP] Provisioned /etc/clear.asm  -  Client - Log:44
+  13:27:26.468  [10355.9193] [INFO] [BOOTSTRAP] Provisioned /etc/.init  -  Client - Log:44
+  13:27:26.468  [10355.9195] [INFO] [BOOTSTRAP] Provisioned /etc/hello_low.asm  -  Client - Log:44
+  13:27:26.468  [10355.9197] [INFO] [BOOTSTRAP] InitRD Mounted.  -  Client - Log:44
+  13:27:26.470  [10355.9213] [INFO] [KERNEL] Kernel initialized successfully.  -  Client - Log:44
+  13:27:26.470  [10355.9215] [INFO] [SCHEDULER] Spawned Process 1: Init (Priority: 1)  -  Client - Log:44
+  13:27:26.470  [10355.9216] [INFO] [KERNEL] Kernel main loop started.  -  Client - Log:44
+  13:27:26.484  [10355.9359] [INFO] [KERNEL] Spawning init process (PID 1) via ASM...  -  Client - Log:44
+  13:27:27.626  [10357.0774] [INFO] [SCHEDULER] Spawned Process 2: /bin/asm.lua (Priority: 1)  -  Client - Log:44
+  13:27:27.699  DEBUG: Executing process with args: 3  -  Client - Process:41
+  13:27:27.794  [10357.2458] [WARN] [KERNEL] Process 2 crashed: @UserChunk:4: ReplicatedStorage.Kernel.Core.LuaVM.FiOne:706: attempt to call a nil value  -  Client - Log:44
+  13:27:27.794  [TTY] /  -  Client - DevTTY:51

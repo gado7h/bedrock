@@ -329,6 +329,26 @@ function Scheduler:Spawn(name: string, entry: () -> (), initialEnv: { [string]: 
         end
         env.Syscall("PRINT", msg .. "\n")
     end
+    
+    env.warn = function(...)
+        local args = {...}
+        local msg = ""
+        for i, v in ipairs(args) do
+            msg = msg .. tostring(v) .. (i < #args and "\t" or "")
+        end
+        env.Syscall("PRINT", "[WARN] " .. msg .. "\n")
+    end
+    
+    env.task = {
+        wait = function(sec) return env.syscall("SLEEP", sec or 0) end,
+        delay = function(sec, cb) 
+            coroutine.wrap(function()
+                env.syscall("SLEEP", sec or 0)
+                cb()
+            end)()
+        end,
+        spawn = function(cb) coroutine.wrap(cb)() end,
+    }
 
 	local process: Types.Process = {
 		PID = pid,

@@ -37,10 +37,13 @@ function Process.Init(System, Call)
     			local proc = scheduler.Processes[(scheduler :: any).CurrentPID]
     			local env = if proc then proc.Env else procEnv
     			local executable, _loadErr = Loader.LoadString(System, content, env)
-    			if executable then
-                    print("DEBUG: Executing process with args: " .. tostring(#(args or {})))
-    				executable(table.unpack(args or {}))
-    			else
+    				if executable then
+                        print("DEBUG: Executing process with args: " .. tostring(#(args or {})))
+    					local success, err = pcall(executable, table.unpack(args or {}))
+                        if not success then
+                            warn("Process execution failed: " .. tostring(err))
+                        end
+    				else
     				warn("Failed to load binary: " .. tostring(_loadErr))
     			end
     		end, procEnv)
