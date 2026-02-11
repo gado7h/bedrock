@@ -254,6 +254,7 @@ function Scheduler:Spawn(name: string, entry: () -> (), initialEnv: { [string]: 
     env.syscall = function(name, ...)
         return coroutine.yield(name, ...)
     end
+    env.Syscall = env.syscall
 
     env.require = function(libName)
         -- Support relative paths if they start with /lib/ or similar,
@@ -313,6 +314,9 @@ function Scheduler:Spawn(name: string, entry: () -> (), initialEnv: { [string]: 
     env.UDim2 = UDim2
     env.UDim = UDim
     env.Enum = Enum
+    env.buffer = buffer
+    env.utf8 = utf8
+    env.DateTime = DateTime
     env._VERSION = "Bedrock Userland 1.0"
 
 	local process: Types.Process = {
