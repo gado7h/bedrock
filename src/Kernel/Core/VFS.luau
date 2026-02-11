@@ -65,7 +65,7 @@ local S_IRUSR = 256
 -- For simplicity, we'll assume Userland resolves PWD or passes full paths.
 -- Or simpler: Kernel handles Paths.
 
-local Errno = require(script.Parent.Errno)
+local Errno = require(script.Parent.Parent.Utils.Errno)
 
 -- Permission Check Logic
 -- mask: 4 (Read), 2 (Write), 1 (Execute)
@@ -354,7 +354,7 @@ end
 local _mounts: { [string]: any } = {}
 
 function VFS.Mount(path: string, driver: any)
-	local Log = require(script.Parent.Log)
+	local Log = require(script.Parent.Parent.Utils.Log)
 	_mounts[path] = driver
 	Log.info("VFS", "Mounted %s at %s", driver.Name or "Driver", path)
 end
