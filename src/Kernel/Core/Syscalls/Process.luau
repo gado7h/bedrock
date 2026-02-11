@@ -38,7 +38,7 @@ function Process.Init(System, Call)
     			local env = if proc then proc.Env else procEnv
     			local executable, _loadErr = Loader.LoadString(System, content, env)
     			if executable then
-    				executable()
+    				executable(table.unpack(args or {}))
     			else
     				warn("Failed to load binary: " .. tostring(_loadErr))
     			end

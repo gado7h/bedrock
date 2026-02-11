@@ -662,10 +662,6 @@ local function run_lua_func(state, env, upvals)
 							index = memory[inst.C]
 						end
 
-						if memory[inst.B] == nil then
-							local debug_info = string.format("PC:%d OP:%d A:%d B:%d C:%d Index:%s", pc-1, op, inst.A, inst.B, inst.C, tostring(index))
-							warn("[FiOne] CRASH: Table is nil. " .. debug_info)
-						end
 						memory[inst.A] = memory[inst.B][index]
 					else
 						--[[SUB]]
