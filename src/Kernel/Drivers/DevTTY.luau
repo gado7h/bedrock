@@ -48,7 +48,7 @@ function DevTTY.Write(path: string, content: string, uid: number)
 			end
 		end
 	else
-		print("[TTY] " .. content)
+		warn("[TTY] " .. content)
 	end
 	return true
 end
