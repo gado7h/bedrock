@@ -92,4 +92,47 @@ function GPU:Clear(colorRGBA: number)
     self:Flush()
 end
 
+function GPU:Rect(x, y, w, h, rgba)
+    local vram = self._vramOffset
+    local sw = self.Width
+    local ram = self._ram
+    
+    -- Clip to screen bounds
+    if x < 0 then w = w + x; x = 0 end
+    if y < 0 then h = h + y; y = 0 end
+    if x + w > sw then w = sw - x end
+    if y + h > self.Height then h = self.Height - y end
+    if w <= 0 or h <= 0 then return end
+
+    for i = 0, h - 1 do
+        local rowAddr = vram + ((y + i) * sw + x) * 4
+        ram:Fill32(rowAddr, rgba, w * 4)
+    end
+    self:Flush()
+end
+
+function GPU:Scroll(dy, rgba)
+    local vram = self._vramOffset
+    local sw = self.Width
+    local sh = self.Height
+    local ram = self._ram
+    local rowSize = sw * 4
+    
+    if dy == 0 then return end
+
+    if dy > 0 then
+        -- Scroll up
+        ram:Copy(vram, vram + dy * rowSize, (sh - dy) * rowSize)
+        -- Clear bottom
+        ram:Fill32(vram + (sh - dy) * rowSize, rgba, dy * rowSize)
+    elseif dy < 0 then
+        -- Scroll down
+        local ady = math.abs(dy)
+        ram:Copy(vram + ady * rowSize, vram, (sh - ady) * rowSize)
+        -- Clear top
+        ram:Fill32(vram, rgba, ady * rowSize)
+    end
+    self:Flush()
+end
+
 return GPU
