@@ -317,6 +317,8 @@ function Scheduler:Spawn(name: string, entry: () -> (), initialEnv: { [string]: 
     env.buffer = buffer
     env.utf8 = utf8
     env.DateTime = DateTime
+    env._G = env
+    env.getfenv = function() return env end
     env._VERSION = "Bedrock Userland 1.0"
 
 	local process: Types.Process = {

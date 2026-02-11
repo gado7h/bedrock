@@ -98,14 +98,32 @@ function Syscalls.Init(system: System)
 		_system.Scheduler.Halted = true
 	end
 
-	-- CPU Introspection
+	-- CPU Introspection & Interrupt Handlers
 	if _system.Scheduler._cpu then
 		_system.Scheduler._cpu:SetSyscallHandler(function(num, cpu)
-			if num == 1 then -- PRINT R0
+			if num == 1 then -- PRINT R0 (Numeric)
 				local val = cpu._state.Registers[1]
 				Syscalls.Call("PRINT", "[CPU] R0=" .. tostring(val) .. "\n")
 			elseif num == 2 then -- EXIT
 				cpu._state.Halted = true
+            elseif num == 3 then -- PRINT STRING at R0
+                local addr = cpu._state.Registers[1]
+                local str = ""
+                local ram = cpu._ram
+                while true do
+                    local b = ram:Read8(addr)
+                    if not b or b == 0 then break end
+                    str = str .. string.char(b)
+                    addr = addr + 1
+                    if #str > 1024 then break end -- Safety limit
+                end
+                Syscalls.Call("PRINT", str .. "\n")
+            elseif num == 4 then -- CLEAR SCREEN (Color in R0)
+                local color = cpu._state.Registers[1]
+                local sw, sh = Syscalls.Call("GPU_INFO")
+                Syscalls.Call("GPU_RECT", 0, 0, sw, sh, color)
+            elseif num == 6 then -- START_SHELL
+                Syscalls.Call("EXEC", "/bin/sh.lua")
 			end
 		end)
 	end
