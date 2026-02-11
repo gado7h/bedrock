@@ -6,6 +6,9 @@
         "Kernel": {
             "$path": "src/Kernel"
         },
+        "Hardware": {
+            "$path": "src/Hardware"
+        },
         "Server": {
             "$path": "src/Server"
         }

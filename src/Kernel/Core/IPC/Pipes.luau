@@ -46,7 +46,6 @@ function Pipes.Close(handle: number)
 	local pipe = Pipes._pipes[handle]
 	if pipe then
 		pipe.Open = false
-		-- We don't delete yet because there might be data to read (EOF)
 	end
 end
 

@@ -1,7 +1,7 @@
 -- Voyager-1 CPU Emulator (v2)
 -- 64-bit Instruction Word: [Op:8][Dest:8][S1:8][S2:8][Imm:32]
 
-local RAM = require(script.Parent.Parent.HAL.RAM)
+local RAM = require(script.Parent.RAM)
 
 local CPU = {}
 CPU.__index = CPU

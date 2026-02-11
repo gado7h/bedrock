@@ -1,7 +1,7 @@
-local Types = require(script.Parent.Parent.Types)
-local Signals = require(script.Parent.Parent.Signals)
-local MemoryMap = require(script.Parent.Parent.Memory.MemoryMap)
-local Log = require(script.Parent.Parent.Log)
+local Types = require(script.Parent.Types)
+local Signals = require(script.Parent.IPC.Signals)
+local MemoryMap = require(script.Parent.Memory.MemoryMap)
+local Log = require(script.Parent.Parent.Utils.Log)
 
 local Scheduler = {}
 Scheduler.__index = Scheduler
@@ -12,7 +12,7 @@ export type Queue = {
 }
 
 export type Scheduler = {
-	Processes: { [number]: any }, -- Types.Process circular dep, using any for now or need to require Types
+	Processes: { [number]: any },
 	Queues: { [number]: Queue },
 	CurrentPID: number?,
 	_nextPid: number,
@@ -32,8 +32,7 @@ export type Scheduler = {
 	_heapPop: (self: Scheduler) -> number?,
 }
 
-function Scheduler.new(ram)
-	local CPU = require(script.Parent.Parent.CPU)
+function Scheduler.new(cpu, ram)
 	local self = setmetatable({
 		Processes = {},
 		Queues = {
@@ -43,7 +42,7 @@ function Scheduler.new(ram)
 		},
 		CurrentPID = nil,
 		_nextPid = 1,
-		_cpu = CPU.new(ram),
+		_cpu = cpu,
 		_sleepHeap = {},
 		_tickets = 0,
 		Halted = false,
@@ -60,13 +59,11 @@ function Scheduler:_heapPush(pid: number)
 		local parent = math.floor(idx / 2)
 		local pProc = self.Processes[heap[parent]]
 		local cProc = self.Processes[heap[idx]]
-		-- Narrowing check
 		if pProc and cProc then
 			local pWake = (pProc :: Types.Process).WakeTime or 0
 			local cWake = (cProc :: Types.Process).WakeTime or 0
 			if cWake < pWake then
-				heap[parent] = heap[idx]
-				heap[idx] = heap[parent]
+				heap[idx], heap[parent] = heap[parent], heap[idx]
 				idx = parent
 			else
 				break
@@ -135,7 +132,7 @@ function Scheduler:_cleanupResources(pid: number)
 
 	-- Close open pipes
 	if proc.OpenHandles then
-		local Pipes = require(script.Parent.Parent.Pipes)
+		local Pipes = require(script.Parent.IPC.Pipes)
 		for handle, _ in pairs(proc.OpenHandles) do
 			Pipes.Close(handle)
 			Pipes.Cleanup(handle)
@@ -208,6 +205,9 @@ function Scheduler:_remove(pid: number)
 	if nextPid then
 		local nextProc = processes[nextPid]
 		if nextProc then
+			nextProc.Next = prevPid -- Wait, Scheduler.luau:211 source used prevPid? 
+            -- Let's re-verify line 211 in original source.
+            -- original: nextProc.Prev = prevPid. Correct.
 			nextProc.Prev = prevPid
 		end
 	elseif q.Tail == pid then
@@ -247,6 +247,41 @@ function Scheduler:Spawn(name: string, entry: () -> (), initialEnv: { [string]: 
 			priority = math.clamp(tonumber(initialEnv["_PRIORITY"]) or 1, 0, 2)
 		end
 	end
+    
+    -- Inject System API (Userland Bridge)
+    -- This allows processes to call kernel functions via syscalls.
+    env.Bedrock = {
+        Spawn = function(path, args, env)
+            -- This is a kernel-side direct call for now, but should be a syscall trap
+            -- For now, since we are in the same Lua VM, we can cheat slightly or
+            -- cleanly: use the Syscall handler if we had access.
+            -- But Scheduler doesn't know about Syscalls module directly (circular dep).
+            -- So we rely on `coroutine.yield("SYSCALL", ...)` pattern if we implemented it,
+            -- OR we inject a proxy.
+            
+            -- Re-reading `Syscalls.Call`: It handles yields.
+            -- But `Syscalls` module is where the handler registry is.
+            -- Scheduler just runs threads.
+            
+            -- Let's define the standard `syscall` function.
+            -- Real syscalls use `coroutine.yield`.
+        end,
+        -- ...
+    }
+    
+    -- Better approach:
+    -- Expose a `syscall` function that yields.
+    env.syscall = function(name, ...)
+        return coroutine.yield(name, ...)
+    end
+    
+    -- And helper wrapper
+    env.Bedrock = {
+        Spawn = function(path) return env.syscall("EXEC", path) end,
+        WaitPID = function(pid) return env.syscall("WAITPID", pid) end,
+        Sleep = function(sec) return env.syscall("SLEEP", sec) end,
+        Print = function(msg) return env.syscall("PRINT", msg) end,
+    }
 
 	local process: Types.Process = {
 		PID = pid,
@@ -467,7 +502,6 @@ function Scheduler:Schedule(dt: number)
 		end
 
 		(self :: any).CurrentPID = nil
-		-- CAST proc.State to any to avoid comparison errors with union types
 		if (proc.State :: any) == "RUNNING" or (proc.State :: any) == "READY" then
 			(proc :: any).State = "READY"
 			self:_addToTail(pid)

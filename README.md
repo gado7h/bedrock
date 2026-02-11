@@ -100,11 +100,14 @@ Automatically maps `/dev/hdd` to a per-player DataStore, ensuring files persist 
 
 ## 📚 Documentation
 
-- [Architecture Guide](docs/ARCHITECTURE.md) - System design and components
-- [API Reference](docs/API.md) - Complete documentation for all 30+ syscalls
-- [Distributions Guide](docs/DISTRIBUTIONS.md) - Build your own OS on Bedrock
-- [UI & App Development](docs/UI_AND_APPS.md) - Create graphical applications
-- [Changelog](CHANGELOG.md) - Version history
+New to Bedrock? Start with the **[Kernel Guide](docs/KERNEL_GUIDE.md)**!
+
+- [**🚀 Kernel Guide**](docs/KERNEL_GUIDE.md) - **Start here!** Concepts, Quick Start, and Driver design.
+- [**Architecture Guide**](docs/ARCHITECTURE.md) - System design and components.
+- [**API Reference**](docs/API.md) - Complete documentation for all 30+ syscalls.
+- [**Distributions Guide**](docs/DISTRIBUTIONS.md) - Build your own OS on Bedrock.
+- [**UI & App Development**](docs/UI_AND_APPS.md) - Create graphical applications.
+- [**Changelog**](CHANGELOG.md) - Version history.
 
 ## 🏗️ Architecture
 

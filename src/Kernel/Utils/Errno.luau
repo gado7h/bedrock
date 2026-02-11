@@ -15,7 +15,6 @@ Errno.EISDIR = 21 -- Is a directory
 Errno.ENOMEM = 12 -- Out of memory
 Errno.ENOSYS = 38 -- Function not implemented
 
--- Human-readable descriptions
 Errno.Messages = {
 	[Errno.SUCCESS] = "Success",
 	[Errno.EPERM] = "Operation not permitted",
@@ -31,7 +30,6 @@ Errno.Messages = {
 	[Errno.ENOSYS] = "Function not implemented",
 }
 
--- Get a human-readable error string
 function Errno.Strerror(code: number): string
 	return Errno.Messages[code] or `Unknown error ({code})`
 end

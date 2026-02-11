@@ -1,133 +1,47 @@
+-- FileSystem Syscalls
+local Errno = require(script.Parent.Parent.Parent.Utils.Errno)
+
 local FileSystem = {}
 
-function FileSystem.Init(System: any)
-	local function asyncVFS(proc: any, func, ...): ...any
-		if proc.SyscallResult then
-			local resultVFS = proc.SyscallResult
-			proc.SyscallResult = nil
-			return table.unpack(resultVFS :: any)
-		end
+function FileSystem.Init(System)
+	local VFS = System.VFS
+	local HANDLERS = {}
 
-		proc.State = "SYSCALL"
-		local args = { ... }
-		task.spawn(function()
-			local resultVFS = { func(table.unpack(args)) }
-			proc.SyscallResult = resultVFS
-			System.Scheduler:WakeUp(proc.PID)
-		end)
-		coroutine.yield()
-
-		if proc.SyscallResult then
-			local resultVFS = proc.SyscallResult
-			proc.SyscallResult = nil
-			return table.unpack(resultVFS :: any)
-		end
+	HANDLERS["FS_READ"] = function(path: string)
+		local content, err = VFS.Read(path, 0, 0)
+		if not content then return nil, err or Errno.ENOENT end
+		return content
 	end
 
-	return {
-		["FS_LIST"] = function(path: string)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
+	HANDLERS["FS_WRITE"] = function(path: string, content: any)
+		local ok, err = VFS.Write(path, content, 0, 0)
+		if not ok then return false, err or Errno.EIO end
+		return true
+	end
 
-			local driver, relPath = System.VFS.GetDriver(path)
-			if driver and driver.Async then
-				return asyncVFS(proc, driver.List, relPath, uid, gid)
-			end
+	HANDLERS["FS_LIST"] = function(path: string)
+		local list, err = VFS.List(path, 0, 0)
+		if not list then return nil, err or Errno.ENOENT end
+		return list
+	end
 
-			return System.VFS.List(path, uid, gid)
-		end,
+	HANDLERS["FS_STAT"] = function(path: string)
+		local stat, err = VFS.Stat(path)
+		if not stat then return nil, err or Errno.ENOENT end
+		return stat
+	end
 
-		["FS_READ"] = function(path: string)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
+	HANDLERS["FS_MKDIR"] = function(path: string)
+		local ok, err = VFS.MkDir(path, 0, 0)
+		if not ok then return false, err or Errno.EACCES end
+		return true
+	end
 
-			local driver, relPath = System.VFS.GetDriver(path)
-			if driver and driver.Async then
-				return asyncVFS(proc, driver.Read, relPath, uid, gid)
-			end
+    HANDLERS["FS_EXISTS"] = function(path: string)
+        return VFS.Stat(path) ~= nil
+    end
 
-			return System.VFS.Read(path, uid, gid)
-		end,
-
-		["FS_WRITE"] = function(path: string, content: string)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
-
-			path = System.VFS.NormalizePath(path)
-			local driver, relPath = System.VFS.GetDriver(path)
-			if driver and driver.Async then
-				asyncVFS(proc, driver.Write, relPath, content, uid, gid)
-				return true
-			end
-
-			System.VFS.Write(path, content, uid, gid)
-			return true
-		end,
-
-		["FS_MKDIR"] = function(path)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
-
-			path = System.VFS.NormalizePath(path)
-			local driver, relPath = System.VFS.GetDriver(path)
-			if driver and driver.Async then
-				return asyncVFS(proc, driver.MkDir, relPath, uid, gid)
-			end
-
-			return System.VFS.MkDir(path, uid, gid)
-		end,
-
-		["FS_REMOVE"] = function(path)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
-
-			path = System.VFS.NormalizePath(path)
-			local driver, relPath = System.VFS.GetDriver(path)
-			if driver and driver.Async and driver.Remove then
-				-- Support async Remove if driver has it
-				return asyncVFS(proc, driver.Remove :: any, relPath, uid, gid)
-			end
-
-			return System.VFS.Remove(path, uid, gid)
-		end,
-
-		["FS_CHMOD"] = function(path, mode)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
-
-			return System.VFS.Chmod(path, mode, uid, gid)
-		end,
-
-		["FS_CHOWN"] = function(path, newUid, newGid)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
-
-			return System.VFS.Chown(path, newUid, newGid, uid, gid)
-		end,
-
-		["FS_STAT"] = function(path)
-			local pid = System.Scheduler.CurrentPID
-			local proc = System.Scheduler.Processes[pid]
-			local uid = (proc and proc.UID) or 0
-			local gid = (proc and proc.GID) or 0
-
-			return System.VFS.Stat(path, uid, gid)
-		end,
-	}
+	return HANDLERS
 end
 
 return FileSystem

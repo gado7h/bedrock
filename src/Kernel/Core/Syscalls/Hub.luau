@@ -1,17 +1,17 @@
-local Syscalls = {}
+-- Hub Syscalls
+local Hub = {}
 
-function Syscalls.Init(system: any)
-	local Hub = system.Hub
+function Hub.Init(System)
+	local HANDLERS = {}
 
-	return {
-		["HUB_PUSH"] = function(namespace: string, repo: string, data: any)
-			return Hub:Push(namespace, repo, data)
-		end,
+	HANDLERS["HUB_INVOKE"] = function(cmd: string, ...: any)
+		if System.Hub then
+			return System.Hub:Invoke(cmd, ...)
+		end
+		return nil, "Hub Offline"
+	end
 
-		["HUB_PULL"] = function(namespace: string, repo: string)
-			return Hub:Pull(namespace, repo)
-		end,
-	}
+	return HANDLERS
 end
 
-return Syscalls
+return Hub

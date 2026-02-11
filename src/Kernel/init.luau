@@ -1,107 +1,79 @@
 local RunService = game:GetService("RunService")
 
 local MemoryMap = require(script.Core.Memory.MemoryMap)
-
-local GPU = require(script.HAL.GPU)
-local HID = require(script.HAL.HID)
-local Network = require(script.HAL.Network)
-local Scheduler = require(script.Core.Process.Scheduler)
+local Scheduler = require(script.Core.Scheduler)
 local Syscalls = require(script.Core.Syscalls)
-local Pipes = require(script.Core.Pipes)
--- local libc = require(script.Parent.Userland.libc) -- DECOUPLED!
-
-local Log = require(script.Core.Log)
-
-local RAM = require(script.HAL.RAM)
-local Hub = require(script.HAL.Hub)
+local Pipes = require(script.Core.IPC.Pipes)
+local Log = require(script.Utils.Log)
+local Bootstrap = require(script.Core.Bootstrap)
+local VFS = require(script.Core.VFS)
+local Heap = require(script.Core.Memory.Heap)
 
 local Kernel = {}
 
--- Kernel Configuration Type
-export type KernelConfig = {
-	Name: string?,
-	Version: string?,
-	BootScript: string?,
-	RAMSize: number?,
-	VideoWidth: number?,
-	VideoHeight: number?,
-	VFS: any?, -- Application specific VFS provisioning
-}
-
-local _config: KernelConfig = {
+-- Kernel configuration state
+local _config = {
 	Name = "Bedrock",
 	Version = "1.0.0",
 	BootScript = "/boot.lua",
-	RAMSize = 512 * 1024 * 1024,
-	VideoWidth = 640,
-	VideoHeight = 360,
 }
 
 local _system = {}
 
-function Kernel.Init(config: KernelConfig?)
-	if config then
-		for k, v in pairs(config) do
-			_config[k] = v
-		end
+-- Real Kernel Init: Probes existing hardware
+function Kernel.Init(Hardware, Config)
+	if Config then
+		for k, v in pairs(Config) do _config[k] = v end
 	end
 
-	Log.info("KERNEL", "Initializing %s v%s...", _config.Name, _config.Version)
+	Log.info("KERNEL", "Bedrock Kernel v%s starting...", _config.Version)
+	Log.info("KERNEL", "Probing hardware...")
 
-	-- 1. Hardware Initialization
-	local ram = RAM.new(_config.RAMSize)
-	local gpu = GPU.new(ram, _config.VideoWidth, _config.VideoHeight)
-	local hid = HID.new()
-	local network = Network.new()
-	local hub = Hub.new()
-	local hdd = require(script.Drivers.HDD_Driver).new()
-
-	local VFS = require(script.Core.VFS)
-	local BIOS = require(script.Core.BIOS)
-
-	-- 2. BIOS POST
-	local ok, _err = BIOS.InitHardware({
-		RAM = ram,
-		GPU = gpu,
-		HID = hid,
-		Network = network,
-		Hub = hub,
-		HDD = hdd,
-	})
-
-	if not ok then
-		-- BIOS Panic
-		gpu:Clear(4) -- Red
-		gpu:Flush()
-		error("BIOS POST Failed: " .. tostring(_err))
+	-- 1. Component Verification
+	local ram = Hardware.RAM
+	local gpu = Hardware.GPU
+	local hid = Hardware.HID
+	
+	if not ram or not gpu then
+		error("KERNEL PANIC: Critical hardware missing during boot!")
 	end
 
-	-- 3. Core Initialization
+	-- 2. Core Subsystem Initialization
 	VFS.Init()
-	VFS.Mount("/dev/hdd", hdd)
-
-	local scheduler = Scheduler.new(ram)
-	local Heap = require(script.Core.Memory.Heap)
+	
+	local scheduler = Scheduler.new(Hardware.CPU, ram)
 	local heap = Heap.new(ram, MemoryMap.HEAP_START, MemoryMap.HEAP_END)
 
-	-- 3b. Bootstrap / Provisioning (Flash "Disk")
-    -- Bootstrap needs VFS, GPU, Scheduler, Pipes
-	local Bootstrap = require(script.Core.Bootstrap)
-	Bootstrap.Init({
-        VFS = VFS,
-        GPU = gpu,
-        Scheduler = scheduler,
-        Pipes = Pipes
-    })
+	-- 3. Device Initialization (Mounting drivers to hardware)
+	local DevGPU = require(script.Drivers.DevGPU)
+	DevGPU.Init(gpu)
+	VFS.Mount("/dev/gpu", DevGPU)
 
-	-- Custom VFS Provisioning (if provided by Distro)
+	local DevTTY = require(script.Drivers.DevTTY)
+	DevTTY.Init(scheduler, Pipes)
+	VFS.Mount("/dev/tty", DevTTY)
+
+    local DevHDD = require(script.Drivers.DevHDD)
+    DevHDD.Init(Hardware.HDD)
+    VFS.Mount("/dev/hdd", DevHDD)
+
+	-- 4. Kernel Provisioning
+	Bootstrap.Init({
+		VFS = VFS,
+		GPU = gpu,
+		Scheduler = scheduler,
+		Pipes = Pipes,
+        HDD = Hardware.HDD, -- For legacy support in bootstrap if needed
+	})
+
+	-- Apply custom VFS provisioning
 	if _config.VFS then
-		Log.info("KERNEL", "Applying custom VFS provisioning...")
 		for path, content in pairs(_config.VFS) do
 			VFS.Write(path, content, 0, 0)
 		end
 	end
 
+	-- 5. Syscall Registration
 	Syscalls.Init({
 		Scheduler = scheduler,
 		GPU = gpu,
@@ -110,56 +82,48 @@ function Kernel.Init(config: KernelConfig?)
 		Pipes = Pipes,
 		RAM = ram,
 		Heap = heap,
-		Network = network,
-		Hub = hub,
+		Network = Hardware.Network,
+		Hub = Hardware.Hub,
 	})
 
 	_system = {
 		Scheduler = scheduler,
 		VFS = VFS,
-		BIOS = BIOS,
-		GPU = gpu,
-        HDD = hdd,
+		Syscalls = Syscalls,
 	}
-	
-	Log.info("KERNEL", "Initialization Complete. Ready to Start.")
-	return Kernel
+
+	Log.info("KERNEL", "Kernel initialized successfully.")
 end
 
 function Kernel.Start()
 	if not _system.Scheduler then
-		error("Kernel not initialized! Call Kernel.Init() first.")
+		error("Kernel not initialized!")
 	end
 
-	local VFS = _system.VFS
-	local BIOS = _system.BIOS
 	local scheduler = _system.Scheduler
 
-	-- 4. Hand over to BIOS for Booting
 	local function BootSequence()
-		-- Try Distro BootScript first
-		if _config.BootScript and VFS.Stat(_config.BootScript) then
-			Log.info("KERNEL", "Booting custom script: %s", _config.BootScript)
-			Syscalls.Call("EXEC", _config.BootScript)
-		else
-			-- Fallback to standard BIOS boot
-			BIOS.Boot(VFS, Syscalls)
+		if _config.BootScript and _system.VFS.Stat(_config.BootScript) then
+			Log.info("KERNEL", "Executing boot script: %s", _config.BootScript)
+			_system.Syscalls.Call("EXEC", _config.BootScript)
+		elseif _system.VFS.Stat("/init.lua") then
+            Log.info("KERNEL", "Spawning init process (PID 1)...")
+            _system.Syscalls.Call("EXEC", "/init.lua")
+        else
+            -- Fallback
+            Log.info("KERNEL", "No init found. Starting emergency shell...")
+            _system.Syscalls.Call("EXEC", "/bin/sh.lua")
 		end
 	end
 
-	-- Save for reboot
-	Syscalls.BootSequence = BootSequence
+	_system.Syscalls.BootSequence = BootSequence
+	scheduler:Spawn("Init", BootSequence)
 
-	scheduler:Spawn("BIOS", BootSequence)
-
-	-- 5. Main Loop (The "idle" loop handling hardware and scheduling)
 	RunService.Heartbeat:Connect(function(dt)
-		-- Schedule
 		scheduler:Schedule(dt)
-		-- Note: GPU flush is handled by userspace apps (libc.Graphics.Flush)
 	end)
 
-	Log.info("KERNEL", "Kernel Started.")
+	Log.info("KERNEL", "Kernel main loop started.")
 end
 
 return Kernel

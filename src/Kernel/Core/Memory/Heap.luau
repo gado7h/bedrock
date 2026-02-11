@@ -1,8 +1,6 @@
 -- Kernel Heap Allocator (First-Fit)
 -- Manages RAM from 0x080000 to 0x0FFFFF
 
-local RAM = require(script.Parent.Parent.Parent.HAL.RAM)
-
 local Heap = {}
 Heap.__index = Heap
 
@@ -14,7 +12,7 @@ type BlockHeader = {
 
 export type Heap = typeof(setmetatable(
 	{} :: {
-		_ram: RAM.RAM,
+		_ram: any,
 		_start: number,
 		_end: number,
 		_blocks: { BlockHeader },
@@ -22,7 +20,7 @@ export type Heap = typeof(setmetatable(
 	Heap
 ))
 
-function Heap.new(ram: RAM.RAM, startAddr: number, endAddr: number): Heap
+function Heap.new(ram, startAddr: number, endAddr: number): Heap
 	local self = setmetatable({
 		_ram = ram,
 		_start = startAddr,

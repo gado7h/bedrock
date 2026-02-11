@@ -1,5 +1,5 @@
 -- Shared utility for loading and compiling Lua code safely
-local LuaVM = require(script.Parent.LuaVM)
+local LuaVM = require(script.Parent.Parent.Core.LuaVM)
 
 local Loader = {}
 
