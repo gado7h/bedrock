@@ -250,38 +250,69 @@ function Scheduler:Spawn(name: string, entry: () -> (), initialEnv: { [string]: 
     
     -- Inject System API (Userland Bridge)
     -- This allows processes to call kernel functions via syscalls.
-    env.Bedrock = {
-        Spawn = function(path, args, env)
-            -- This is a kernel-side direct call for now, but should be a syscall trap
-            -- For now, since we are in the same Lua VM, we can cheat slightly or
-            -- cleanly: use the Syscall handler if we had access.
-            -- But Scheduler doesn't know about Syscalls module directly (circular dep).
-            -- So we rely on `coroutine.yield("SYSCALL", ...)` pattern if we implemented it,
-            -- OR we inject a proxy.
-            
-            -- Re-reading `Syscalls.Call`: It handles yields.
-            -- But `Syscalls` module is where the handler registry is.
-            -- Scheduler just runs threads.
-            
-            -- Let's define the standard `syscall` function.
-            -- Real syscalls use `coroutine.yield`.
-        end,
-        -- ...
-    }
-    
-    -- Better approach:
-    -- Expose a `syscall` function that yields.
     env.syscall = function(name, ...)
         return coroutine.yield(name, ...)
     end
+
+    env.require = function(libName)
+        -- Support relative paths if they start with /lib/ or similar,
+        -- but usually shell requires "Console", "libc" etc.
+        local path = libName
+        if not string.find(libName, "%.") and not string.find(libName, "/") then
+            path = "/lib/" .. libName .. ".lua"
+        end
+        
+        local lib, err = coroutine.yield("LIB_LOAD", path)
+        if not lib then
+            error(`Failed to load library '{libName}': {err or "Unknown error"}`, 2)
+        end
+        return lib
+    end
     
-    -- And helper wrapper
     env.Bedrock = {
         Spawn = function(path) return env.syscall("EXEC", path) end,
         WaitPID = function(pid) return env.syscall("WAITPID", pid) end,
         Sleep = function(sec) return env.syscall("SLEEP", sec) end,
         Print = function(msg) return env.syscall("PRINT", msg) end,
     }
+
+    -- Standard Lua globals for userspace (Sandboxed)
+    env.ipairs = ipairs
+    env.pairs = pairs
+    env.next = next
+    env.tostring = tostring
+    env.tonumber = tonumber
+    env.type = type
+    env.select = select
+    env.pcall = pcall
+    env.xpcall = xpcall
+    env.error = error
+    env.assert = assert
+    env.rawget = rawget
+    env.rawset = rawset
+    env.setmetatable = setmetatable
+    env.getmetatable = getmetatable
+    env.math = math
+    env.table = table
+    env.string = string
+    env.bit32 = bit32
+    env.os = {
+        clock = os.clock,
+        time = os.time,
+        date = os.date,
+        difftime = os.difftime,
+    }
+    env.coroutine = coroutine
+    env.debug = {
+        traceback = debug.traceback,
+    }
+    env.Color3 = Color3
+    env.Vector3 = Vector3
+    env.Vector2 = Vector2
+    env.UDim2 = UDim2
+    env.UDim = UDim
+    env.Enum = Enum
+    env._VERSION = "Bedrock Userland 1.0"
 
 	local process: Types.Process = {
 		PID = pid,
