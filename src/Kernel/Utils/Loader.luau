@@ -11,6 +11,14 @@ function Loader.LoadString(System: any, content: string, env: any): (any, string
 	local err
 
 	if not bc then
+		-- Double-Wrap Detection:
+		-- If content starts with "return " and strict quoting, try to unwrap.
+		-- Pattern: ^\s*return\s*%[(=*)%[(.*)%]%1%]\s*$
+		local equals, inner = string.match(content, "^%s*return%s*%[(=*)%[(.*)%]%1%]%s*$")
+		if inner then
+			content = inner
+		end
+
 		-- Reset quantum timer for current process to avoid timeout during compilation
 		if System and System.Scheduler and (System.Scheduler :: any).CurrentPID then
 			local pid = (System.Scheduler :: any).CurrentPID
