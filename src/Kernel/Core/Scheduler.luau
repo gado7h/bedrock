@@ -508,7 +508,7 @@ function Scheduler:Schedule(dt: number)
 			proc.SyscallResult = nil
 
 			local elapsed = (os.clock() - proc.StartTime) * 1000
-			;(proc :: any).TotalTime += elapsed
+			(proc :: any).TotalTime += elapsed
 
 			local success = results[1]
 			if not success then
@@ -517,9 +517,9 @@ function Scheduler:Schedule(dt: number)
 				if self.OnProcessCrash then
 					self.OnProcessCrash(pid, tostring(err))
 				end
-				;(proc :: any).State = "DEAD"
+				(proc :: any).State = "DEAD"
 			elseif coroutine.status(proc.Thread) == "dead" then
-				;(proc :: any).State = "DEAD"
+				(proc :: any).State = "DEAD"
 			else
 				-- Thread yielded.
 				local syscallName = results[2]
