@@ -41,7 +41,7 @@ local function Call(name: string, ...: any)
 	if handler then
 		return handler(...)
 	else
-		local Log = require(script.Parent.Parent.Parent.Utils.Log)
+		local Log = require(script.Parent.Parent.Utils.Log)
 		Log.warn("SYSCALL", "Unknown Syscall: %s", name)
 		return nil, "Unknown Syscall"
 	end
@@ -78,17 +78,11 @@ function Syscalls.Init(system: System)
 
 	-- System Power Management
 	HANDLERS["SYSTEM_REBOOT"] = function()
-		local Log = require(script.Parent.Parent.Parent.Utils.Log)
+		local Log = require(script.Parent.Parent.Utils.Log)
 		Log.info("KERNEL", "SYSTEM REBOOT initiated...")
 		
         -- New Architecture: Defer to Motherboard
-        -- We just need to signal the hardware to reset.
-        -- But wait, Kernel doesn't have direct access to Motherboard module unless injected?
-        -- `_system.RAM` etc are just components.
-        -- We CAN access `_G.Hardware` or we can require Motherboard if it's in the hierarchy.
-        
-        -- Safe bet: Require Motherboard
-        local Motherboard = require(script.Parent.Parent.Parent.Parent.Hardware.Motherboard)
+        local Motherboard = require(script.Parent.Parent.Parent.Hardware.Motherboard)
         Motherboard.Reset()
 	end
 
