@@ -69,6 +69,17 @@ function Kernel.Init(Hardware, Config)
 	-- Apply custom VFS provisioning
 	if _config.VFS then
 		for path, content in pairs(_config.VFS) do
+            -- Ensure parent directories exist
+            local parts = string.split(path, "/")
+            if #parts > 1 then
+                local current = ""
+                for i = 1, #parts - 1 do
+                    current = current .. "/" .. parts[i]
+                    if not VFS.Stat(current) then
+                        VFS.MkDir(current, 0, 0)
+                    end
+                end
+            end
 			VFS.Write(path, content, 0, 0)
 		end
 	end
