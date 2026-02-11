@@ -320,6 +320,15 @@ function Scheduler:Spawn(name: string, entry: () -> (), initialEnv: { [string]: 
     env._G = env
     env.getfenv = function() return env end
     env._VERSION = "Bedrock Userland 1.0"
+    
+    env.print = function(...)
+        local args = {...}
+        local msg = ""
+        for i, v in ipairs(args) do
+            msg = msg .. tostring(v) .. (i < #args and "\t" or "")
+        end
+        env.Syscall("PRINT", msg .. "\n")
+    end
 
 	local process: Types.Process = {
 		PID = pid,

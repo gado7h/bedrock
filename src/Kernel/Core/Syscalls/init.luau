@@ -19,6 +19,9 @@ local _system: System
 local _noYield = 0
 local HANDLERS: { [string]: any } = {}
 
+local KernelRoot = script:FindFirstAncestor("Kernel")
+local Log = require(KernelRoot.Utils.Log)
+
 -- Forward declaration for internal call
 local function Call(name: string, ...: any)
 	if name ~= "LIB_LOAD" then
@@ -41,7 +44,6 @@ local function Call(name: string, ...: any)
 	if handler then
 		return handler(...)
 	else
-		local Log = require(script.Parent.Parent.Utils.Log)
 		Log.warn("SYSCALL", "Unknown Syscall: %s", name)
 		return nil, "Unknown Syscall"
 	end
@@ -78,16 +80,14 @@ function Syscalls.Init(system: System)
 
 	-- System Power Management
 	HANDLERS["SYSTEM_REBOOT"] = function()
-		local Log = require(script.Parent.Parent.Utils.Log)
 		Log.info("KERNEL", "SYSTEM REBOOT initiated...")
 		
         -- New Architecture: Defer to Motherboard
-        local Motherboard = require(script.Parent.Parent.Parent.Hardware.Motherboard)
+        local Motherboard = require(KernelRoot.Parent.Hardware.Motherboard)
         Motherboard.Reset()
 	end
 
 	HANDLERS["SYSTEM_SHUTDOWN"] = function()
-		local Log = require(script.Parent.Parent.Parent.Utils.Log)
 		Log.info("KERNEL", "SYSTEM SHUTDOWN initiated...")
 		_system.Scheduler.Halted = true
 	end
