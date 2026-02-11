@@ -102,6 +102,7 @@ function Syscalls.Init(system: System)
 		_system.Scheduler._cpu:SetSyscallHandler(function(num, cpu)
 			if num == 1 then -- PRINT R0 (Numeric)
 				local val = cpu._state.Registers[1]
+                warn("[CPU RAW] " .. tostring(val))
 				Syscalls.Call("PRINT", "[CPU] R0=" .. tostring(val) .. "\n")
 			elseif num == 2 then -- EXIT
 				cpu._state.Halted = true

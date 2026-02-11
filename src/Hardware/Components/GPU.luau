@@ -36,6 +36,7 @@ function GPU:Init()
     local playerGui = player and player:FindFirstChild("PlayerGui")
 
     if playerGui then
+        print("[GPU] Creating ScreenGui in", playerGui)
         local screenGui = Instance.new("ScreenGui")
         screenGui.Name = "VOYAGER_DISPLAY"
         screenGui.ResetOnSpawn = false
