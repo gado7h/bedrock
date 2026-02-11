@@ -1,0 +1,13 @@
+{
+    "name": "Bedrock",
+    "emitLegacyScripts": false,
+    "tree": {
+        "$className": "Folder",
+        "Kernel": {
+            "$path": "src/Kernel"
+        },
+        "Server": {
+            "$path": "src/Server"
+        }
+    }
+}

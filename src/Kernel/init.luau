@@ -109,8 +109,9 @@ function Kernel.Start()
 			Log.info("KERNEL", "Executing boot script: %s", _config.BootScript)
 			_system.Syscalls.Call("EXEC", _config.BootScript)
 		elseif _system.VFS.Stat("/etc/.init") then
-             Log.info("KERNEL", "Spawning init process (PID 1)...")
-             _system.Syscalls.Call("EXEC", "/etc/.init")
+             Log.info("KERNEL", "Spawning init process (PID 1) via ASM...")
+             -- Execute asm.lua with the init file as an argument
+             _system.Syscalls.Call("EXEC", "/bin/asm.lua", {"/etc/.init"})
         elseif _system.VFS.Stat("/init.lua") then
             Log.info("KERNEL", "Spawning legacy init (PID 1)...")
             _system.Syscalls.Call("EXEC", "/init.lua")

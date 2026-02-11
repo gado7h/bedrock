@@ -1,0 +1,17 @@
+{
+  "languageMode": "strict",
+  "lint": {
+    "*": true,
+    "LocalShadow": false,
+    "LocalUnused": true,
+    "UnknownGlobal": true
+  },
+  "lintErrors": true,
+  "globals": [
+    "game",
+    "workspace",
+    "script",
+    "shared",
+    "task"
+  ]
+}
