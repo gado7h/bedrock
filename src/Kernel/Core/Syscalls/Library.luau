@@ -12,7 +12,12 @@ function Library.Init(System, Call)
 		if not content then return nil, err end
 
 		local Loader = require(script.Parent.Parent.Parent.Utils.Loader)
-		local func, loadErr = Loader.LoadString(System, content, getfenv())
+		local scheduler = System.Scheduler
+		local currentPid = if scheduler then scheduler.CurrentPID else nil
+		local proc = if currentPid then scheduler.Processes[currentPid] else nil
+		local env = if proc then proc.Env else getfenv()
+
+		local func, loadErr = Loader.LoadString(System, content, env)
 		if func then
 			local lib = func()
 			_libCache[path] = lib

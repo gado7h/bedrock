@@ -18,7 +18,7 @@ function BIOS.Boot(Hardware, Config)
 
 	-- 2. Initialize Hardware
 	Hardware.GPU:Init()
-    Hardware.GPU:Clear(0x000000FF) -- Black
+    Hardware.GPU:Clear(0xFF000000) -- Solid Black (Little Endian: A=FF, B=00, G=00, R=00)
 	print("[BIOS] GPU initialized.")
 
 	Hardware.HID:Init()
