@@ -66,7 +66,7 @@ function Motherboard.PowerOn(Config)
     Motherboard.State.LEDs.PWR = true
     
     local HardwareCP = require(script.Parent.ControlPanel.HardwareCP)
-    HardwareCP.Mount(Motherboard)
+    -- HardwareCP.Mount(Motherboard) -- Debugging Timeout
 
     print("[MOTHERBOARD] Power On sequence initiated.")
 

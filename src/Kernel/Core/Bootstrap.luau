@@ -19,6 +19,7 @@ function Bootstrap.Init(System)
     
     if not Userspace then
         Log.warn("BOOTSTRAP", "No Userspace folder found in ReplicatedStorage!")
+        Log.warn("BOOTSTRAP", "Bedrock Kernel requires a distribution (e.g. PremiumOS) to boot.")
         return
     end
 
