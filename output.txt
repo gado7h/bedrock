@@ -1,52 +1,82 @@
-  13:13:51.829  [Bedrock] Initializing Kernel Host Services...  -  Server - KernelServer:18
-  13:13:51.830  [Bedrock] Host Services Ready in ReplicatedStorage.Bedrock_Host  -  Server - KernelServer:55
-  13:13:52.228  Powering On Bedrock System...  -  Client - Boot:66
-  13:13:52.336  [MOTHERBOARD] Power On sequence initiated.  -  Client - Motherboard:71
-  13:13:52.336  [BIOS] Voyager-1 BIOS v1.0.0 initializing...  -  Client - BIOS:7
-  13:13:52.337  [BIOS] RAM Test: 512MB OK  -  Client - BIOS:17
-  13:13:52.342  [BIOS] GPU initialized.  -  Client - BIOS:22
-  13:13:52.342  [BIOS] HID initialized.  -  Client - BIOS:25
-  13:13:52.342  [BIOS] Service bridges connected.  -  Client - BIOS:30
-  13:13:52.343  [BOOTLOADER] Searching for Kernel bundle...  -  Client - Bootloader:7
-  13:13:52.346  [BOOTLOADER] Transferring control to Kernel...  -  Client - Bootloader:14
-  13:13:52.347  [9541.7983] [INFO] [KERNEL] Bedrock Kernel v2.0.0 starting...  -  Client - Log:44
-  13:13:52.347  [9541.7983] [INFO] [KERNEL] Probing hardware...  -  Client - Log:44
-  13:13:52.347  [9541.7986] [INFO] [VFS] Mounted DevGPU at /dev/gpu  -  Client - Log:44
-  13:13:52.347  [9541.7989] [INFO] [VFS] Mounted DevTTY at /dev/tty  -  Client - Log:44
-  13:13:52.347  [9541.7991] [INFO] [VFS] Mounted DevHDD at /dev/hdd  -  Client - Log:44
-  13:13:52.348  [9541.7992] [INFO] [BOOTSTRAP] Mounting InitRD from ReplicatedStorage/Userspace...  -  Client - Log:44
-  13:13:52.348  [9541.7993] [INFO] [BOOTSTRAP] Provisioned /bin/cat.lua  -  Client - Log:44
-  13:13:52.348  [9541.7994] [INFO] [BOOTSTRAP] Provisioned /bin/name.lua  -  Client - Log:44
-  13:13:52.348  [9541.7996] [INFO] [BOOTSTRAP] Provisioned /bin/colorstest.lua  -  Client - Log:44
-  13:13:52.348  [9541.7997] [INFO] [BOOTSTRAP] Provisioned /bin/rm.lua  -  Client - Log:44
-  13:13:52.348  [9541.7998] [INFO] [BOOTSTRAP] Provisioned /bin/grep.lua  -  Client - Log:44
-  13:13:52.348  [9541.7999] [INFO] [BOOTSTRAP] Provisioned /bin/rbx.lua  -  Client - Log:44
-  13:13:52.348  [9541.7999] [INFO] [BOOTSTRAP] Provisioned /bin/ls.lua  -  Client - Log:44
-  13:13:52.348  [9541.8000] [INFO] [BOOTSTRAP] Provisioned /bin/chmod.lua  -  Client - Log:44
-  13:13:52.348  [9541.8001] [INFO] [BOOTSTRAP] Provisioned /bin/wait.lua  -  Client - Log:44
-  13:13:52.349  [9541.8002] [INFO] [BOOTSTRAP] Provisioned /bin/reboot.lua  -  Client - Log:44
-  13:13:52.349  [9541.8003] [INFO] [BOOTSTRAP] Provisioned /bin/sh.lua  -  Client - Log:44
-  13:13:52.349  [9541.8004] [INFO] [BOOTSTRAP] Provisioned /bin/chown.lua  -  Client - Log:44
-  13:13:52.349  [9541.8005] [INFO] [BOOTSTRAP] Provisioned /bin/shutdown.lua  -  Client - Log:44
-  13:13:52.349  [9541.8006] [INFO] [BOOTSTRAP] Provisioned /bin/env.lua  -  Client - Log:44
-  13:13:52.349  [9541.8007] [INFO] [BOOTSTRAP] Provisioned /bin/lag.lua  -  Client - Log:44
-  13:13:52.349  [9541.8008] [INFO] [BOOTSTRAP] Provisioned /bin/nano.lua  -  Client - Log:44
-  13:13:52.349  [9541.8009] [INFO] [BOOTSTRAP] Provisioned /bin/libtest.lua  -  Client - Log:44
-  13:13:52.349  [9541.8010] [INFO] [BOOTSTRAP] Provisioned /bin/asm.lua  -  Client - Log:44
-  13:13:52.349  [9541.8011] [INFO] [BOOTSTRAP] Provisioned /lib/Font.lua  -  Client - Log:44
-  13:13:52.349  [9541.8011] [INFO] [BOOTSTRAP] Provisioned /lib/Console.lua  -  Client - Log:44
-  13:13:52.350  [9541.8012] [INFO] [BOOTSTRAP] Provisioned /lib/input.lua  -  Client - Log:44
-  13:13:52.350  [9541.8013] [INFO] [BOOTSTRAP] Provisioned /lib/libc.lua  -  Client - Log:44
-  13:13:52.350  [9541.8014] [INFO] [BOOTSTRAP] Provisioned /lib/colors.lua  -  Client - Log:44
-  13:13:52.350  [9541.8015] [INFO] [BOOTSTRAP] Provisioned /lib/utils.lua  -  Client - Log:44
-  13:13:52.350  [9541.8016] [INFO] [BOOTSTRAP] Provisioned /lib/ui.lua  -  Client - Log:44
-  13:13:52.350  [9541.8017] [INFO] [BOOTSTRAP] Provisioned /sbin/main.lua  -  Client - Log:44
-  13:13:52.350  [9541.8018] [INFO] [BOOTSTRAP] Provisioned /etc/hello_low.asm  -  Client - Log:44
-  13:13:52.350  [9541.8019] [INFO] [BOOTSTRAP] Provisioned /etc/.init  -  Client - Log:44
-  13:13:52.350  [9541.8020] [INFO] [BOOTSTRAP] Provisioned /etc/clear.asm  -  Client - Log:44
-  13:13:52.350  [9541.8021] [INFO] [BOOTSTRAP] InitRD Mounted.  -  Client - Log:44
-  13:13:52.352  [9541.8033] [INFO] [KERNEL] Kernel initialized successfully.  -  Client - Log:44
-  13:13:52.352  [9541.8035] [INFO] [SCHEDULER] Spawned Process 1: Init (Priority: 1)  -  Client - Log:44
-  13:13:52.352  [9541.8036] [INFO] [KERNEL] Kernel main loop started.  -  Client - Log:44
-  13:13:53.896  [9543.3472] [INFO] [KERNEL] Spawning init process (PID 1) via ASM...  -  Client - Log:44
-  13:13:54.072  [9543.5235] [INFO] [SCHEDULER] Spawned Process 2: /bin/asm.lua (Priority: 1)  -  Client - Log:44
+  13:21:30.003  [Bedrock] Initializing Kernel Host Services...  -  Server - KernelServer:18
+  13:21:30.003  [Bedrock] Host Services Ready in ReplicatedStorage.Bedrock_Host  -  Server - KernelServer:55
+  13:21:30.260  Powering On Bedrock System...  -  Client - Boot:66
+  13:21:30.356  [MOTHERBOARD] Power On sequence initiated.  -  Client - Motherboard:71
+  13:21:30.356  [BIOS] Voyager-1 BIOS v1.0.0 initializing...  -  Client - BIOS:7
+  13:21:30.357  [BIOS] RAM Test: 512MB OK  -  Client - BIOS:17
+  13:21:30.362  [BIOS] GPU initialized.  -  Client - BIOS:22
+  13:21:30.362  [BIOS] HID initialized.  -  Client - BIOS:25
+  13:21:30.362  [BIOS] Service bridges connected.  -  Client - BIOS:30
+  13:21:30.362  [BOOTLOADER] Searching for Kernel bundle...  -  Client - Bootloader:7
+  13:21:30.366  [BOOTLOADER] Transferring control to Kernel...  -  Client - Bootloader:14
+  13:21:30.366  [9999.8177] [INFO] [KERNEL] Bedrock Kernel v2.0.0 starting...  -  Client - Log:44
+  13:21:30.366  [9999.8178] [INFO] [KERNEL] Probing hardware...  -  Client - Log:44
+  13:21:30.366  [9999.8181] [INFO] [VFS] Mounted DevGPU at /dev/gpu  -  Client - Log:44
+  13:21:30.367  [9999.8183] [INFO] [VFS] Mounted DevTTY at /dev/tty  -  Client - Log:44
+  13:21:30.367  [9999.8185] [INFO] [VFS] Mounted DevHDD at /dev/hdd  -  Client - Log:44
+  13:21:30.367  [9999.8186] [INFO] [BOOTSTRAP] Mounting InitRD from ReplicatedStorage/Userspace...  -  Client - Log:44
+  13:21:30.367  [9999.8187] [INFO] [BOOTSTRAP] Provisioned /bin/shutdown.lua  -  Client - Log:44
+  13:21:30.367  [9999.8188] [INFO] [BOOTSTRAP] Provisioned /bin/ls.lua  -  Client - Log:44
+  13:21:30.367  [9999.8189] [INFO] [BOOTSTRAP] Provisioned /bin/wait.lua  -  Client - Log:44
+  13:21:30.367  [9999.8190] [INFO] [BOOTSTRAP] Provisioned /bin/rm.lua  -  Client - Log:44
+  13:21:30.367  [9999.8190] [INFO] [BOOTSTRAP] Provisioned /bin/sh.lua  -  Client - Log:44
+  13:21:30.367  [9999.8191] [INFO] [BOOTSTRAP] Provisioned /bin/name.lua  -  Client - Log:44
+  13:21:30.368  [9999.8192] [INFO] [BOOTSTRAP] Provisioned /bin/lag.lua  -  Client - Log:44
+  13:21:30.368  [9999.8193] [INFO] [BOOTSTRAP] Provisioned /bin/colorstest.lua  -  Client - Log:44
+  13:21:30.368  [9999.8194] [INFO] [BOOTSTRAP] Provisioned /bin/grep.lua  -  Client - Log:44
+  13:21:30.368  [9999.8195] [INFO] [BOOTSTRAP] Provisioned /bin/asm.lua  -  Client - Log:44
+  13:21:30.368  [9999.8196] [INFO] [BOOTSTRAP] Provisioned /bin/nano.lua  -  Client - Log:44
+  13:21:30.368  [9999.8196] [INFO] [BOOTSTRAP] Provisioned /bin/reboot.lua  -  Client - Log:44
+  13:21:30.368  [9999.8197] [INFO] [BOOTSTRAP] Provisioned /bin/chmod.lua  -  Client - Log:44
+  13:21:30.368  [9999.8198] [INFO] [BOOTSTRAP] Provisioned /bin/chown.lua  -  Client - Log:44
+  13:21:30.368  [9999.8199] [INFO] [BOOTSTRAP] Provisioned /bin/env.lua  -  Client - Log:44
+  13:21:30.368  [9999.8199] [INFO] [BOOTSTRAP] Provisioned /bin/cat.lua  -  Client - Log:44
+  13:21:30.368  [9999.8200] [INFO] [BOOTSTRAP] Provisioned /bin/rbx.lua  -  Client - Log:44
+  13:21:30.368  [9999.8201] [INFO] [BOOTSTRAP] Provisioned /bin/libtest.lua  -  Client - Log:44
+  13:21:30.369  [9999.8202] [INFO] [BOOTSTRAP] Provisioned /lib/Font.lua  -  Client - Log:44
+  13:21:30.369  [9999.8203] [INFO] [BOOTSTRAP] Provisioned /lib/ui.lua  -  Client - Log:44
+  13:21:30.369  [9999.8204] [INFO] [BOOTSTRAP] Provisioned /lib/Console.lua  -  Client - Log:44
+  13:21:30.369  [9999.8205] [INFO] [BOOTSTRAP] Provisioned /lib/input.lua  -  Client - Log:44
+  13:21:30.369  [9999.8206] [INFO] [BOOTSTRAP] Provisioned /lib/libc.lua  -  Client - Log:44
+  13:21:30.369  [9999.8208] [INFO] [BOOTSTRAP] Provisioned /lib/utils.lua  -  Client - Log:44
+  13:21:30.369  [9999.8209] [INFO] [BOOTSTRAP] Provisioned /lib/colors.lua  -  Client - Log:44
+  13:21:30.369  [9999.8210] [INFO] [BOOTSTRAP] Provisioned /sbin/main.lua  -  Client - Log:44
+  13:21:30.369  [9999.8211] [INFO] [BOOTSTRAP] Provisioned /etc/hello_low.asm  -  Client - Log:44
+  13:21:30.370  [9999.8212] [INFO] [BOOTSTRAP] Provisioned /etc/clear.asm  -  Client - Log:44
+  13:21:30.370  [9999.8213] [INFO] [BOOTSTRAP] Provisioned /etc/.init  -  Client - Log:44
+  13:21:30.370  [9999.8214] [INFO] [BOOTSTRAP] InitRD Mounted.  -  Client - Log:44
+  13:21:30.371  [9999.8225] [INFO] [KERNEL] Kernel initialized successfully.  -  Client - Log:44
+  13:21:30.371  [9999.8226] [INFO] [SCHEDULER] Spawned Process 1: Init (Priority: 1)  -  Client - Log:44
+  13:21:30.371  [9999.8227] [INFO] [KERNEL] Kernel main loop started.  -  Client - Log:44
+  13:21:31.221  [10000.6726] [INFO] [KERNEL] Spawning init process (PID 1) via ASM...  -  Client - Log:44
+  13:21:31.243  [10000.6944] [INFO] [SCHEDULER] Spawned Process 2: /bin/asm.lua (Priority: 1)  -  Client - Log:44
+  13:21:31.804  DEBUG: Executing process with args: 3  -  Client - Process:41
+  13:21:32.956  [TTY] /  -  Client - DevTTY:51
+  13:21:33.035  [10002.4870] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.077  [10002.5283] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.095  [10002.5455] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.127  [10002.5784] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.147  [10002.5985] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.152  [10002.6039] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.223  [10002.6742] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.348  [10002.7993] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.369  [10002.8210] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.388  [10002.8395] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.392  [10002.8432] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.396  [10002.8479] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.403  [10002.8550] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.411  [10002.8623] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.420  [10002.8720] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.430  [10002.8812] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.440  [10002.8918] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.450  [10002.9014] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.461  [10002.9126] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.468  [10002.9197] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.478  [10002.9299] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.485  [10002.9369] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.495  [10002.9465] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.502  [10002.9537] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.512  [10002.9637] [WARN] [SYSCALL] Unknown Syscall: POLL_EVENTS  -  Client - Log:44
+  13:21:33.530   ▶ [TTY] / (x3)  -  Client - DevTTY:51
+  13:21:33.585  [10003.0367] [INFO] [SCHEDULER] Spawned Process 4: /bin/sh.lua (Priority: 1)  -  Client - Log:44
+  13:21:38.081  DEBUG: Executing process with args: 0  -  Client - Process:41

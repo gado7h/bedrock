@@ -92,6 +92,11 @@ function Syscalls.Init(system: System)
 		_system.Scheduler.Halted = true
 	end
 
+    HANDLERS["POLL_EVENTS"] = function()
+        -- Cooperative yield
+        coroutine.yield()
+    end
+
 	-- CPU Introspection & Interrupt Handlers
 	if _system.Scheduler._cpu then
 		_system.Scheduler._cpu:SetSyscallHandler(function(num, cpu)
