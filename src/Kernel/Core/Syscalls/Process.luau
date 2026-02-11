@@ -13,18 +13,38 @@ function Process.Init(System, Call)
 
 		local Loader = require(script.Parent.Parent.Parent.Utils.Loader)
 		local procEnv = env or {}
-		local pid = scheduler:Spawn(path, function()
-			local proc = scheduler.Processes[(scheduler :: any).CurrentPID]
-			local env = if proc then proc.Env else procEnv
-			local executable, _loadErr = Loader.LoadString(System, content, env)
-			if executable then
-				executable()
-			else
-				warn("Failed to load binary: " .. tostring(_loadErr))
-			end
-		end, procEnv)
-
-		return true, nil, pid
+        
+        -- Binary Detection: Check for null byte header or .bin extension
+        local isBinary = string.sub(content, 1, 1) == "\0" or string.sub(path, -4) == ".bin"
+        
+        if isBinary then
+             -- Load Binary into RAM
+             local RAM = System.RAM
+             local MemoryMap = require(script.Parent.Parent.Memory.MemoryMap)
+             local baseAddr = MemoryMap.PROGRAM_BASE
+             
+             -- Write content to RAM
+             for i = 1, #content do
+                 local byte = string.byte(content, i, i)
+                 RAM:Write8(baseAddr + i - 1, byte)
+             end
+             
+             local pid = scheduler:SpawnBinary(path, baseAddr)
+             return true, nil, pid
+        else
+            -- Lua Script Execution
+    		local pid = scheduler:Spawn(path, function()
+    			local proc = scheduler.Processes[(scheduler :: any).CurrentPID]
+    			local env = if proc then proc.Env else procEnv
+    			local executable, _loadErr = Loader.LoadString(System, content, env)
+    			if executable then
+    				executable()
+    			else
+    				warn("Failed to load binary: " .. tostring(_loadErr))
+    			end
+    		end, procEnv)
+            return true, nil, pid
+        end
 	end
 
 	HANDLERS["KILL"] = function(pid: number, sig: number?)
