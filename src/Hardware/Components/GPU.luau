@@ -75,7 +75,10 @@ function GPU:Init()
 end
 
 function GPU:Flush()
-    if not self._editableImage then return end
+    if not self._editableImage then 
+        warn("[GPU] Flush skipped: No EditableImage")
+        return 
+    end
     
     local ramBuf = self._ram:GetBuffer()
     local rgbaBuf = self._rgbaBuffer
